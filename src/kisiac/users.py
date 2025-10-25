@@ -2,7 +2,6 @@ import grp
 import os
 from pathlib import Path
 import pwd
-import subprocess as sp
 
 import yaml
 
