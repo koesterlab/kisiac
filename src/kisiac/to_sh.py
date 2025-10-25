@@ -25,6 +25,7 @@ def func_to_sh(func: Callable) -> str:
         {func_name}() {{
             python - << EOF
             {module_code}
+            {func_name}()
             EOF
         }}
         """
