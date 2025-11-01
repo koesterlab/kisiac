@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from kisiac.common import run_cmd
+from kisiac.config import Config
 from kisiac.to_sh import func_to_sh
 from kisiac.update import update_host
 from simple_parsing import ArgumentParser
@@ -33,4 +34,5 @@ def main() -> None:
             input=func_to_sh(update_host),
             sudo=True,
             host=args.update_host_settings.host,
+            env={"KISIAC_CONFIG": Config().as_str()},
         )

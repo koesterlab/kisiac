@@ -25,3 +25,6 @@ dev = ["ruff"]
 
 [tool.pixi.environments]
 dev = ["dev"]
+
+[tool.pixi.dependencies]
+inquirer = ">=3.4.1,<4"

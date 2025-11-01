@@ -1,19 +1,21 @@
 from dataclasses import dataclass
 from enum import Enum
 import grp
+import json
 import os
 from pathlib import Path
 import platform
 import pwd
 import re
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Self, Sequence
 import base64
 
 import jinja2
 import yaml
 import git
 
-from kisiac.common import cache, UserError
+from kisiac.common import cache, UserError, check_type, run_cmd
+from kisiac.lvm import LVMEntities
 
 
 required_marker = object()
@@ -277,7 +279,7 @@ class Config:
         check_type("infrastructure_name key", infrastructure_name, str)
         return infrastructure_name
 
-
-def check_type(item: str, value: Any, type: Any) -> None:
-    if not isinstance(value, type):
-        raise UserError(f"Expecting url for {item}, found {type(value)} ({value}).")
+    @property
+    def lvm(self) -> LVMEntities:
+        lvm = self.get("lvm", default={})
+        return LVMEntities.from_config(lvm)
