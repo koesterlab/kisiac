@@ -1,0 +1,37 @@
+setup_cmd() {
+  cmd=$1
+  install_cmd=$2
+  if ! [ -x "$(command -v $cmd)" ]
+  then
+    echo Installing "$cmd..."
+    eval "$install_cmd"
+    relogin=true
+  fi
+}
+
+setup_cmd pixi "curl -fsSL https://pixi.sh/install.sh | sh"
+
+{% for pkg in packages %}
+setup_cmd pkg.cmd pkg.install_cmd
+{% endfor %}
+
+{% set head_lines = "=" * len(infrastructure_name) %}
+
+cat << EOF
+==========={{ head_lines }}
+Welcome to {{ infrastructure_name }}
+==========={{ head_lines }}
+Hints:
+* Use pixi for managing user software
+* Update pixi: pixi self-update
+* Install software: pixi global install <software>
+* Update software: pixi global update <software>
+* Update all software: pixi global update
+* Use the following commands for common tasks
+{% for pkg in packages %}
+  * {{ pkg.cmd }}: {{ pkg.desc }}
+{% endfor %}
+{% for msg in messages %}
+* {{ msg }}
+{% endfor %}
+EOF

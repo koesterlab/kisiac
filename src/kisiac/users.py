@@ -1,37 +1,22 @@
 import grp
-import os
 from pathlib import Path
 import pwd
 
-import yaml
-
-from kisiac import common
+from kisiac.common import run_cmd
+from kisiac.config import Config
 
 
 def setup_users() -> None:
-    try:
-        users = os.environ["KISIAC_USERS"]
-    except KeyError:
-        raise common.UserError("Environment variable KISIAC_USERS is not set.")
-    users = yaml.safe_load(users)
-
     if not is_existing_group("koesterlab"):
         print("Creating group: koesterlab")
-        common.run_cmd(["groupadd", "koesterlab"])
+        run_cmd(["groupadd", "koesterlab"])
 
-    for user, spec in users.items():
-        try:
-            ssh_key = spec["ssh_pub_key"]
-        except KeyError:
-            raise common.UserError(
-                f"User {user} is missing 'ssh_pub_key' specification."
-            )
-
+    for user in Config().users:
         homedir = Path(f"~{user}").expanduser()
 
-        if not is_existing_user(user):
+        if not is_existing_user(user.username):
             print(f"Creating user: {user}")
-            common.run_cmd(
+            run_cmd(
                 [
                     "useradd",
                     "--groups",
@@ -39,7 +24,7 @@ def setup_users() -> None:
                     "--shell",
                     "/bin/bash",
                     "-m",
-                    user,
+                    user.username,
                 ]
             )
         else:
@@ -49,9 +34,8 @@ def setup_users() -> None:
         sshdir.mkdir(mode=0o700, exist_ok=True)
         auth_keys_file = sshdir / "authorized_keys"
         with auth_keys_file.open("w", encoding="utf-8") as f:
-            f.write(ssh_key + "\n")
-        auth_keys_file.chmod(0o600)
-        os.chown(auth_keys_file, pwd.getpwnam(user).pw_uid, grp.getgrnam(user).gr_gid)
+            f.write(user.ssh_pub_key + "\n")
+        user.secure_file(auth_keys_file)
 
 
 def is_existing_user(username: str) -> bool:

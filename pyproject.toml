@@ -1,6 +1,6 @@
 [project]
 authors = [{name = "Johannes Koester", email = "johannes.koester@uni-due.de"}]
-dependencies = ["pyyaml>=6.0.3,<7"]
+dependencies = ["pyyaml>=6.0.3,<7", "jinja2>=3.1.6,<4", "gitpython>=3.1.45,<4", "simple-parsing>=0.1.7,<0.2"]
 name = "kisiac"
 requires-python = ">= 3.11"
 version = "0.1.0"
@@ -18,6 +18,7 @@ kisiac = { path = ".", editable = true }
 
 [tool.pixi.feature.dev.tasks]
 format = "ruff format src"
+check = "ruff check src"
 
 [dependency-groups]
 dev = ["ruff"]
