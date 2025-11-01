@@ -35,6 +35,7 @@ def run_cmd(
         cmd = ["sudo", f"bash -c '{' '.join(cmd)}'"]
     if host is not None and host != "localhost":
         cmd = ["ssh", host, f"{' '.join(cmd)}"]
+    print(f"Running command: {' '.join(cmd)}")
     try:
         return sp.run(
             cmd,

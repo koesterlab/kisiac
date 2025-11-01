@@ -22,17 +22,16 @@ class LV:
 class VG:
     name: str
     pvs: set[PV]
-    lvs: set[LV]
+    lvs: dict[str, LV]
 
 
 @dataclass
 class LVMEntities:
     pvs: set[PV] = set()
     vgs: dict[str, VG] = {}
-    lvs: dict[str, LV] = {}
 
     def is_empty(self) -> bool:
-        return not self.pvs and not self.vgs and not self.lvs
+        return not self.pvs and not self.vgs
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> Self:
@@ -60,14 +59,6 @@ class LVMEntities:
                 name=name,
                 pvs={PV(device=pv) for pv in settings.get("pvs", [])},
                 lvs=lvs_entities
-            )
-        for name, settings in config.get("lvs", {}).items():
-            check_type(f"lvm lv {name} entry", settings, dict)
-            entities.lvs[name] = LV(
-                name=name,
-                layout=settings["layout"],
-                size=settings["size"],
-                vg=entities.vgs[settings["vg"]],
             )
         return entities
 
