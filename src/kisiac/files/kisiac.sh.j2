@@ -1,3 +1,5 @@
+relogin=false
+
 setup_cmd() {
   cmd=$1
   install_cmd=$2
@@ -17,7 +19,10 @@ setup_cmd pkg.cmd pkg.install_cmd
 
 {% set head_lines = "=" * len(infrastructure_name) %}
 
-cat << EOF
+if [ "$relogin" = true ] ; then
+  echo "Please relogin to apply changes."
+else
+  cat << EOF
 ==========={{ head_lines }}
 Welcome to {{ infrastructure_name }}
 ==========={{ head_lines }}
@@ -35,3 +40,4 @@ Hints:
 * {{ msg }}
 {% endfor %}
 EOF
+fi

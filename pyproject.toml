@@ -28,3 +28,4 @@ dev = ["dev"]
 
 [tool.pixi.dependencies]
 inquirer = ">=3.4.1,<4"
+requests = ">=2.32.5,<3"

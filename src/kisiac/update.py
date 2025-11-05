@@ -3,22 +3,32 @@ from kisiac import users
 from kisiac.config import Config
 from kisiac.lvm import LVMEntities
 
+import inquirer
 
-def update_host() -> None:
+
+def setup_config() -> None:
+    answers = inquirer.prompt([
+        inquirer.Text("secret_config", message="Paste the secret configuration (YAML format), including the repo key"),
+    ])
+    with open("/etc/kisiac.yaml", "w") as f:
+        f.write(answers["secret_config"])
+
+
+def update_host(host: str) -> None:
     config = Config()
     for file in config.files.get_files(user=None):
-        file.write(overwrite_existing=True)
+        file.write(overwrite_existing=True, host=host)
 
-    update_system_packages()
+    update_system_packages(host)
 
-    update_lvm()
+    update_lvm(host)
 
     users.setup_users()
     for user in config.users:
         for file in config.files.get_files(user.username):
             # If the user already has the files, we leave him the new file as a
             # template next to the actual file, with the suffix '.updated'.
-            user.fix_permissions(file.write(overwrite_existing=False))
+            user.fix_permissions(file.write(overwrite_existing=False, host=host), host=host)
 
 
 def update_system_packages() -> None:

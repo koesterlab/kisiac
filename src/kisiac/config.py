@@ -14,8 +14,11 @@ import jinja2
 import yaml
 import git
 
-from kisiac.common import cache, UserError, check_type, run_cmd
+from kisiac.common import HostAgnosticPath, cache, UserError, check_type, run_cmd
 from kisiac.lvm import LVMEntities
+
+
+config_file_path = Path("/etc/kisiac.yaml")
 
 
 required_marker = object()
@@ -48,17 +51,16 @@ class File:
     target_path: Path
     content: str
 
-    def write(self, overwrite_existing: bool) -> Sequence[Path]:
-        target_path = self.target_path
-        if self.target_path.exists() and not overwrite_existing:
-            target_path = self.target_path.with_suffix(".updated")
+    def write(self, overwrite_existing: bool, host: str) -> Sequence[Path]:
+        target_path = HostAgnosticPath(self.target_path, host=host)
+        if target_path.exists() and not overwrite_existing:
+            target_path = target_path.with_suffix(".updated")
         created = []
         for ancestor in target_path.parents[::-1][1:]:
             if not ancestor.exists():
                 ancestor.mkdir()
                 created.append(ancestor)
-        with open(target_path, "w") as f:
-            f.write(self.content)
+        target_path.write_text(self.content)
         created.append(target_path)
         return created
 
@@ -148,18 +150,15 @@ class User:
     def usergroup(self) -> str:
         return self.username
 
-    def fix_permissions(self, paths: Iterable[Path]) -> None:
+    def fix_permissions(self, paths: Iterable[Path], host: str) -> None:
         for path in paths:
+            path = HostAgnosticPath(path, host=host)
             # ensure that only user may read/write the paths
             if path.is_dir():
                 path.chmod(0o700)
             else:
                 path.chmod(0o600)
-            os.chown(
-                path,
-                pwd.getpwnam(self.username).pw_uid,
-                grp.getgrnam(self.usergroup).gr_gid,
-            )
+            path.chown(self.username, self.usergroup)
 
 
 class Config:
@@ -171,24 +170,49 @@ class Config:
         return cls._instance
 
     def __init__(self) -> None:
-        # Config is bootstrapped via an env variable that contains YAML.
+        # Config is bootstrapped via an env variable that contains YAML or the file config_file_path.
         # It at least has to contain the repo: ... key that points to a
         # git repo containing the actual config.
         # However, it may also contain e.g. user definitions or secret (environment)
         # variables.
-        # Then, the actual config is
+
+        self._config: dict[str, Any] = {}
+
+        def update_config(config) -> None:
+            config = yaml.safe_load(config)
+
+            if not isinstance(config, dict):
+                raise ValueError("Config has to be a mapping")
+            self._config.update(config)
+
+        config_set = False
+
         try:
-            config_raw = os.environ["KISIAC_CONFIG"]
-        except KeyError:
+            with open(config_file_path, "r") as f:
+                update_config(f)
+            config_set = True
+        except (FileNotFoundError, IOError):
+            # ignore missing file or read errors, we fall back to env var
+            pass
+        except Exception as e:
+            # raise other errors
+            raise UserError(f"Error reading config file {config_file_path}: {e}") from e
+
+        try:
+            update_config(os.environ["KISIAC_CONFIG"])
+            config_set = True
+        except KeyError as e:
+            pass  # ignore missing env var
+        except Exception as e:
+            raise UserError(f"Error reading KISIAC_CONFIG env var: {e}") from e
+
+        if not config_set:
             raise UserError(
-                "Environment variable KISIAC_CONFIG is not set. Run update_config or bootstrap kisiac with curl https://github.com/koesterlab/kisiac...TODO."
+                "KISIAC_CONFIG is not set and no config file found at "
+                f"{config_file_path}. Run 'kisiac setup-config' to set up the "
+                "configuration."
             )
-        config = yaml.safe_load(config_raw)
 
-        if not isinstance(config, dict):
-            raise UserError("KISIAC_CONFIG has to be a mapping")
-
-        self._config: dict[str, Any] = config
         self._files: Files | None = None
 
         self._config.update(self.files.get_config())
