@@ -15,7 +15,7 @@ import yaml
 import git
 
 from kisiac.common import HostAgnosticPath, cache, UserError, check_type, run_cmd
-from kisiac.lvm import LVMEntities
+from kisiac.lvm import LVMSetup
 
 
 config_file_path = Path("/etc/kisiac.yaml")
@@ -51,8 +51,10 @@ class File:
     target_path: Path
     content: str
 
-    def write(self, overwrite_existing: bool, host: str) -> Sequence[Path]:
-        target_path = HostAgnosticPath(self.target_path, host=host)
+    def write(
+            self, overwrite_existing: bool, host: str, sudo: bool
+    ) -> Sequence[Path]:
+        target_path = HostAgnosticPath(self.target_path, host=host, sudo=sudo)
         if target_path.exists() and not overwrite_existing:
             target_path = target_path.with_suffix(".updated")
         created = []
@@ -152,7 +154,7 @@ class User:
 
     def fix_permissions(self, paths: Iterable[Path], host: str) -> None:
         for path in paths:
-            path = HostAgnosticPath(path, host=host)
+            path = HostAgnosticPath(path, host=host, sudo=True)
             # ensure that only user may read/write the paths
             if path.is_dir():
                 path.chmod(0o700)
@@ -304,6 +306,6 @@ class Config:
         return infrastructure_name
 
     @property
-    def lvm(self) -> LVMEntities:
+    def lvm(self) -> LVMSetup:
         lvm = self.get("lvm", default={})
-        return LVMEntities.from_config(lvm)
+        return LVMSetup.from_config(lvm)

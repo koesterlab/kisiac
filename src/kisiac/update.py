@@ -1,7 +1,8 @@
-from kisiac.common import UserError, confirm_action, run_cmd
+import subprocess as sp
+from kisiac.common import HostAgnosticPath, UserError, confirm_action, run_cmd
 from kisiac import users
 from kisiac.config import Config
-from kisiac.lvm import LVMEntities
+from kisiac.lvm import LVMSetup
 
 import inquirer
 
@@ -10,36 +11,35 @@ def setup_config() -> None:
     answers = inquirer.prompt([
         inquirer.Text("secret_config", message="Paste the secret configuration (YAML format), including the repo key"),
     ])
-    with open("/etc/kisiac.yaml", "w") as f:
-        f.write(answers["secret_config"])
+    HostAgnosticPath("/etc/kisiac.yaml", sudo=True).write_text(answers["secret_config"])
 
 
 def update_host(host: str) -> None:
     config = Config()
     for file in config.files.get_files(user=None):
-        file.write(overwrite_existing=True, host=host)
+        file.write(overwrite_existing=True, host=host, sudo=True)
 
     update_system_packages(host)
 
     update_lvm(host)
 
-    users.setup_users()
+    users.setup_users(host=host)
     for user in config.users:
         for file in config.files.get_files(user.username):
             # If the user already has the files, we leave him the new file as a
             # template next to the actual file, with the suffix '.updated'.
-            user.fix_permissions(file.write(overwrite_existing=False, host=host), host=host)
+            user.fix_permissions(file.write(overwrite_existing=False, host=host, sudo=True), host=host)
 
 
-def update_system_packages() -> None:
-    run_cmd(["apt-get", "update"])
-    run_cmd(["apt-get", "upgrade"])
-    run_cmd(["apt-get", "install"] + Config().system_software)
+def update_system_packages(host: str) -> None:
+    run_cmd(["apt-get", "update"], sudo=True, host=host)
+    run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
+    run_cmd(["apt-get", "install"] + Config().system_software, sudo=True, host=host)
 
 
-def update_lvm() -> None:
+def update_lvm(host: str) -> None:
     desired = Config().lvm
-    current = LVMEntities.from_system()
+    current = LVMSetup.from_system(host=host)
 
     cmds = []
 
@@ -132,9 +132,9 @@ def update_lvm() -> None:
         for cmd_list in cmds:
             for cmd in cmd_list:
                 try:
-                    run_cmd(cmd, sudo=True)
-                except UserError as e:
+                    run_cmd(cmd, host=host, sudo=True, user_error=False)
+                except sp.CalledProcessError as e:
                     raise UserError(
-                        f"Incomplete LVM update due to error (make sure to manually fix this!): {e}"
+                        f"Incomplete LVM update due to error (make sure to manually fix this!): {e.stderr}"
                     )
 

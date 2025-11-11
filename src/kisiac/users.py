@@ -2,18 +2,18 @@ import grp
 from pathlib import Path
 import pwd
 
-from kisiac.common import run_cmd
+from kisiac.common import HostAgnosticPath, run_cmd
 from kisiac.config import Config
 
 
-def setup_users() -> None:
-    if not is_existing_group("koesterlab"):
+def setup_users(host: str) -> None:
+    # create group if it does not exist
+    if not run_cmd([, "koesterlab"], host=host):
         print("Creating group: koesterlab")
-        run_cmd(["groupadd", "koesterlab"])
+        run_cmd(["groupadd", "koesterlab"], host=host, sudo=True)
 
     for user in Config().users:
-        homedir = Path(f"~{user}").expanduser()
-
+        # create user if it does not exist
         if not is_existing_user(user.username):
             print(f"Creating user: {user}")
             run_cmd(
@@ -25,17 +25,21 @@ def setup_users() -> None:
                     "/bin/bash",
                     "-m",
                     user.username,
-                ]
+                ],
+                host=host,
+                sudo=True,
             )
         else:
             print(f"Updating user: {user}")
 
-        sshdir = homedir / ".ssh"
-        sshdir.mkdir(mode=0o700, exist_ok=True)
+        sshdir = HostAgnosticPath(f"~{user}/.ssh", host=host, sudo=True)
+        sshdir.mkdir()
+        sshdir.chown(user.username, user.usergroup)
+        sshdir.chmod(0o700)
         auth_keys_file = sshdir / "authorized_keys"
         with auth_keys_file.open("w", encoding="utf-8") as f:
             f.write(user.ssh_pub_key + "\n")
-        user.secure_file(auth_keys_file)
+        user.fix_permissions(auth_keys_file, host=host)
 
 
 def is_existing_user(username: str) -> bool:
@@ -46,7 +50,7 @@ def is_existing_user(username: str) -> bool:
         return False
 
 
-def is_existing_group(groupname: str) -> bool:
+def is_existing_group(groupname: str, host: str) -> bool:
     try:
         grp.getgrnam(groupname)
         return True

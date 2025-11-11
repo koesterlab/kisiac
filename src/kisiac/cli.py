@@ -37,12 +37,7 @@ def get_argument_parser() -> ArgumentParser:
 def main() -> None:
     args = get_argument_parser().parse_args()
     match args.subparser_name:
-        case "setup-config":
-            run_cmd(
-                ["python", "-"],
-                input=func_to_sh(setup_config),
-                sudo=True,
-            )
+        setup_config()
 
         case "update-hosts":
             for host in args.update_host_settings.hosts:

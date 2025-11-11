@@ -3,7 +3,7 @@ import json
 import shutil
 from typing import Any, Self
 
-from kisiac.common import check_type, run_cmd
+from kisiac.common import check_type, exists_cmd, run_cmd
 
 
 @dataclass(frozen=True)
@@ -21,12 +21,12 @@ class LV:
 @dataclass(frozen=True)
 class VG:
     name: str
-    pvs: set[PV]
-    lvs: dict[str, LV]
+    pvs: set[PV] = set()
+    lvs: dict[str, LV] = dict()
 
 
 @dataclass
-class LVMEntities:
+class LVMSetup:
     pvs: set[PV] = set()
     vgs: dict[str, VG] = {}
 
@@ -63,27 +63,28 @@ class LVMEntities:
         return entities
 
     @classmethod
-    def from_system(cls) -> Self:
-        # check if lvm2 is installed
-        if shutil.which("pvcreate") is None:
+    def from_system(cls, host: str) -> Self:
+        # check if lvm2 is installed, return empty LVM entities otherwise
+        if not exists_cmd("pvcreate", host=host, sudo=True):
             return cls()
 
         entities: Self = cls()
-        
-        data = json.loads(run_cmd(["lvm", "fullreport", "--reportformat", "json_std"], sudo=True).stdout)["report"]
+
+        # load LVM info from report
+        data = json.loads(run_cmd(["lvm", "fullreport", "--reportformat", "json_std"], host=host, sudo=True).stdout)["report"]
         for entry in data:
             for vg in entry["vg"]:
-                entities.vgs[vg["vg_name"]] = VG(name=vg["vg_name"], pvs=[])
+                entities.vgs[vg["vg_name"]] = VG(name=vg["vg_name"])
             for pv in entry["pv"]:
                 pv_obj = PV(device=pv["pv_name"])
-                entities.pvs.append(pv_obj)
-                entities.vgs[pv["vg_name"]].pvs.append(pv_obj)
+                entities.pvs.add(pv_obj)
+                entities.vgs[pv["vg_name"]].pvs.add(pv_obj)
+
             for lv in entry["lv"]:
                 vg = entities.vgs[lv["vg_name"]]
-                entities.lvs[lv["lv_name"]] = LV(
+                vg.lvs[lv["lv_name"]] = LV(
                     name=lv["lv_name"],
                     layout=lv["lv_layout"],
                     size=lv["lv_size"],
-                    vg=vg,
                 )
         return entities

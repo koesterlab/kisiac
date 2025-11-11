@@ -1,12 +1,9 @@
-from pathlib import Path, PosixPath, PurePath
+from pathlib import Path
 import subprocess as sp
 from typing import Any, Callable, Self, Sequence
 import importlib
 import re
 import textwrap
-
-import requests
-
 
 import inquirer
 
@@ -27,20 +24,12 @@ def confirm_action(desc: str) -> bool:
     return response["action"] == "yes"
 
 
-def run_func(
-    func: Callable,
-    host: str = "localhost",
-    env: dict[str, Any] | None = None,
-    sudo: bool = False,
-) -> None:
-    """Run a Python function on the local or a remote host."""
-    run_cmd(
-        ["python", "-"],
-        input=func_to_sh(func),
-        host=host,
-        env=env,
-        sudo=sudo,
-    )
+def exists_cmd(cmd: str, host: str, sudo: bool) -> bool:
+    try:
+        run_cmd(["which", cmd], host=host, sudo=sudo, user_error=False)
+        return True
+    except sp.CalledProcessError:
+        return False
 
 
 def run_cmd(
@@ -117,6 +106,10 @@ class HostAgnosticPath:
         self.path = Path(path)
         self.host = host
         self.sudo = sudo
+        if self.is_local_and_user():
+            # if non local or sudo, shell commands will be used, which expand
+            # the ~ operator automatically
+            self.path = self.path.expanduser()
 
     def read_text(self) -> str:
         if self.is_local_and_user():
