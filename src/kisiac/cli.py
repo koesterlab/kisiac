@@ -1,6 +1,5 @@
 from kisiac.common import (
     GlobalSettings,
-    SetupConfigSettings,
     UpdateHostSettings,
     UserError,
 )
@@ -18,7 +17,6 @@ def get_argument_parser() -> ArgumentParser:
     setup_config = subparsers.add_parser(
         "setup-config", help="Setup the kisiac configuration"
     )
-    setup_config.add_arguments(SetupConfigSettings, dest="setup_config_settings")
 
     return parser
 
