@@ -13,8 +13,7 @@ def get_argument_parser() -> ArgumentParser:
     subparsers = parser.add_subparsers(dest="subcommand", help="subcommand help")
     update_host = subparsers.add_parser("update-hosts", help="Update given hosts")
     update_host.add_arguments(UpdateHostSettings, dest="update_host_settings")
-
-    setup_config = subparsers.add_parser(
+    subparsers.add_parser(
         "setup-config", help="Setup the kisiac configuration"
     )
 
