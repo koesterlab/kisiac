@@ -1,4 +1,9 @@
-from kisiac.common import GlobalSettings, SetupConfigSettings, UpdateHostSettings, UserError
+from kisiac.common import (
+    GlobalSettings,
+    SetupConfigSettings,
+    UpdateHostSettings,
+    UserError,
+)
 from kisiac.update import setup_config, update_host
 from simple_parsing import ArgumentParser
 

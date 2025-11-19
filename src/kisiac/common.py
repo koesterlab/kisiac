@@ -29,7 +29,9 @@ class GlobalSettings(Singleton):
 
 @dataclass
 class UpdateHostSettings(Singleton):
-    hosts: list[str] = field(default_factory=lambda: ["localhost"], metadata={"required": True})  # Hosts to update
+    hosts: list[str] = field(
+        default_factory=lambda: ["localhost"], metadata={"required": True}
+    )  # Hosts to update
 
 
 @dataclass

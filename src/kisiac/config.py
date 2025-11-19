@@ -218,7 +218,6 @@ class User:
 
 
 class Config(Singleton):
-
     def __init__(self) -> None:
         # Config is bootstrapped via an env variable that contains YAML or the file config_file_path.
         # It at least has to contain the repo: ... key that points to a
