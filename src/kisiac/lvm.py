@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from typing import Any, Self
 
@@ -20,14 +20,14 @@ class LV:
 @dataclass(frozen=True)
 class VG:
     name: str
-    pvs: set[PV] = set()
-    lvs: dict[str, LV] = dict()
+    pvs: set[PV] = field(default_factory=set)
+    lvs: dict[str, LV] = field(default_factory=dict)
 
 
 @dataclass
 class LVMSetup:
-    pvs: set[PV] = set()
-    vgs: dict[str, VG] = {}
+    pvs: set[PV] = field(default_factory=set)
+    vgs: dict[str, VG] = field(default_factory=dict)
 
     def is_empty(self) -> bool:
         return not self.pvs and not self.vgs

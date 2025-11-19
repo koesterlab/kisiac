@@ -1,0 +1,42 @@
+users:
+  jkoester:
+    ssh_pub_key: ssh-rsa AAAdummy
+    vars:
+      soemthing: foo
+
+user_software:
+  - pkg: snakemake
+    with: snakemake-storage-plugin-s3
+    desc: for running workflows
+  - pkg: conda
+  - pkg: exa
+    desc: for listing files (ls replacement)
+  - pkg: s5cmd
+    desc: for accessing s3
+  - pkg: starship
+  - pkg: ripgrep
+    cmd: rg
+    desc: for searching text (grep replacement)
+  - pkg: bat
+    desc: for viewing text files (cat replacement)
+  - pkg: sad
+    desc: for text replacing in files (sed replacement)
+  - pkg: fzf
+    desc: for fuzzy finding files
+  - pkg: zoxide
+    desc: for quickly navigating the filesystem (cd replacement)
+  - pkg: nbterm
+    with:
+      - ipykernel
+      - polars
+      - pandas
+      - altair
+    desc: for running jupyter notebooks in the terminal (includes polars, pandas, altair)
+
+system_software:
+  - openssh
+
+messages:
+  - >
+    Do NOT use conda to manage software (it is available, but just for snakemake
+    internal use).

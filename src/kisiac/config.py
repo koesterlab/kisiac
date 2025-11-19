@@ -11,7 +11,7 @@ import yaml
 import git
 from pyfstab.entry import Entry as FstabEntry
 
-from kisiac.common import HostAgnosticPath, cache, UserError, check_type
+from kisiac.common import HostAgnosticPath, Singleton, cache, UserError, check_type
 from kisiac.lvm import LVMSetup
 
 
@@ -217,13 +217,7 @@ class User:
             path.chown(self.username, self.usergroup)
 
 
-class Config:
-    _instance: "Config | None" = None
-
-    def __new__(cls) -> "Config":
-        if cls._instance is None:
-            cls._instance = Config()
-        return cls._instance
+class Config(Singleton):
 
     def __init__(self) -> None:
         # Config is bootstrapped via an env variable that contains YAML or the file config_file_path.

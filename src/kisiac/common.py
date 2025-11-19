@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 import subprocess as sp
 import sys
@@ -14,10 +14,11 @@ cache = Path("~/.cache/kisiac").expanduser()
 
 
 class Singleton(object):
-    def __new__(cls, *args, **kwargs):
-        # see if the instance is already in existence. If not, make a new one.
-        if not hasattr(cls, "_instance"):
-            cls._instance = super().__new__(cls, *args, **kwargs)
+    _instance: Self | None = None
+
+    def __new__(cls, *args, **kwargs) -> Self:
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
         return cls._instance
 
 
@@ -28,7 +29,7 @@ class GlobalSettings(Singleton):
 
 @dataclass
 class UpdateHostSettings(Singleton):
-    hosts: list[str] = ["localhost"]  # Hosts to update
+    hosts: list[str] = field(default_factory=lambda: ["localhost"], metadata={"required": True})  # Hosts to update
 
 
 @dataclass
