@@ -4,18 +4,18 @@ from kisiac.common import (
     UserError,
 )
 from kisiac.update import setup_config, update_host
-from simple_parsing import ArgumentParser
+from simple_parsing import ArgumentParser, DashVariant
 
 
 def get_argument_parser() -> ArgumentParser:
-    parser: ArgumentParser = ArgumentParser()
+    parser: ArgumentParser = ArgumentParser(
+        add_option_string_dash_variants=DashVariant.DASH
+    )
     parser.add_arguments(GlobalSettings, dest="global_settings")
     subparsers = parser.add_subparsers(dest="subcommand", help="subcommand help")
     update_host = subparsers.add_parser("update-hosts", help="Update given hosts")
     update_host.add_arguments(UpdateHostSettings, dest="update_host_settings")
-    subparsers.add_parser(
-        "setup-config", help="Setup the kisiac configuration"
-    )
+    subparsers.add_parser("setup-config", help="Setup the kisiac configuration")
 
     return parser
 

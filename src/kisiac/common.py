@@ -33,6 +33,7 @@ class UpdateHostSettings(Singleton):
         default_factory=lambda: ["localhost"], metadata={"required": True}
     )  # Hosts to update
 
+
 def confirm_action(desc: str) -> bool:
     if GlobalSettings().non_interactive:
         return True
