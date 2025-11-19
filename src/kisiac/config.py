@@ -1,11 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-import grp
-import json
-import os
 from pathlib import Path
 import platform
-import pwd
 import re
 from typing import Any, Iterable, Self, Sequence
 import base64
@@ -13,8 +9,9 @@ import base64
 import jinja2
 import yaml
 import git
+from pyfstab.entry import Entry as FstabEntry
 
-from kisiac.common import HostAgnosticPath, cache, UserError, check_type, run_cmd
+from kisiac.common import HostAgnosticPath, cache, UserError, check_type
 from kisiac.lvm import LVMSetup
 
 
@@ -46,14 +43,68 @@ class FileType(Enum):
     user = "user"
 
 
+@dataclass(frozen=True, order=True)
+class Filesystem:
+    device: Path | None
+    label: str | None
+    uuid: str | None
+    fstype: str
+    mountpoint: Path | None
+    options: str | None
+    dump: int
+    fsck: int
+
+    def __post_init__(self) -> None:
+        if (
+            sum(1 for item in (self.device, self.label, self.uuid) if item is not None)
+            != 1
+        ):
+            raise UserError("Filesystem may only have one of device, label or uuid.")
+
+    @classmethod
+    def from_fstab_entry(cls, entry: FstabEntry) -> Self:
+        assert entry.device is not None
+        assert entry.type is not None
+        if entry.device.startswith("LABEL="):
+            device = None
+            label = entry.device[len("LABEL=") :]
+            uuid = None
+        elif entry.device.startswith("UUID="):
+            device = None
+            label = None
+            uuid = entry.device[len("UUID=") :]
+        else:
+            device = Path(entry.device)
+            label = None
+            uuid = None
+        return cls(
+            device=device,
+            label=label,
+            uuid=uuid,
+            fstype=entry.type,
+            mountpoint=Path(entry.dir) if entry.dir is not None else None,
+            options=entry.options,
+            dump=entry.dump or 0,
+            fsck=entry.fsck or 0,
+        )
+
+    def to_fstab_entry(self) -> FstabEntry:
+        return FstabEntry(
+            _device=str(self.device or self.label or self.uuid),
+            _dir=str(self.mountpoint) if self.mountpoint is not None else None,
+            _type=self.fstype,
+            _options=self.options,
+            _dump=self.dump,
+            _fsck=self.fsck,
+        )
+
+
 @dataclass
 class File:
     target_path: Path
     content: str
 
-    def write(
-            self, overwrite_existing: bool, host: str, sudo: bool
-    ) -> Sequence[Path]:
+    def write(self, overwrite_existing: bool, host: str, sudo: bool) -> Sequence[Path]:
         target_path = HostAgnosticPath(self.target_path, host=host, sudo=sudo)
         if target_path.exists() and not overwrite_existing:
             target_path = target_path.with_suffix(".updated")
@@ -77,10 +128,11 @@ class Files:
         self.user_vars = config.user_vars
         if not self.repo_cache.exists():
             self.repo_cache.parent.mkdir(exist_ok=True)
-            self.repo.clone_from(config.repo)
+            self.repo.clone_from(config.repo, self.repo_cache)
         else:
-            # TODO update to latest commit
-            self.repo.pull()
+            # update to latest commit
+            self.repo.remotes.origin.fetch()
+            self.repo.git.reset("--hard", "origin/main")
 
     def infrastructure_stack(self) -> Iterable[Path]:
         base = self.repo_cache / "infrastructure"
@@ -88,10 +140,12 @@ class Files:
         if self.infrastructure is not None:
             yield base / self.infrastructure
 
-    def host_stack(self) -> Iterable[Path]:
+    def host_stack(self, include_infrastructure_root: bool = False) -> Iterable[Path]:
         hostname = platform.node()
         for infra in self.infrastructure_stack():
             base = infra / "hosts"
+            if include_infrastructure_root:
+                yield infra
             for entry in base.iterdir():
                 if not entry.is_dir():
                     raise UserError(f"{base} may only contain directories")
@@ -102,8 +156,8 @@ class Files:
 
     def get_config(self) -> dict[str, Any]:
         config = {}
-        for infra in self.infrastructure_stack():
-            config_path = infra / "kisiac.yaml"
+        for base in self.host_stack(include_infrastructure_root=True):
+            config_path = base / "kisiac.yaml"
             if config_path.exists():
                 with open(config_path, "r") as f:
                     config.update(yaml.safe_load(f))
@@ -200,17 +254,9 @@ class Config:
             # raise other errors
             raise UserError(f"Error reading config file {config_file_path}: {e}") from e
 
-        try:
-            update_config(os.environ["KISIAC_CONFIG"])
-            config_set = True
-        except KeyError as e:
-            pass  # ignore missing env var
-        except Exception as e:
-            raise UserError(f"Error reading KISIAC_CONFIG env var: {e}") from e
-
         if not config_set:
             raise UserError(
-                "KISIAC_CONFIG is not set and no config file found at "
+                "No config file found at "
                 f"{config_file_path}. Run 'kisiac setup-config' to set up the "
                 "configuration."
             )
@@ -226,7 +272,7 @@ class Config:
         value = self._config.get(key, default=default)
 
         if value is required_marker:
-            raise UserError(f"KISIAC_CONFIG lacks key {key}.")
+            raise UserError(f"Config lacks key {key}.")
 
         return value
 
@@ -309,3 +355,20 @@ class Config:
     def lvm(self) -> LVMSetup:
         lvm = self.get("lvm", default={})
         return LVMSetup.from_config(lvm)
+
+    @property
+    def filesystems(self) -> Iterable[Filesystem]:
+        filesystems = self.get("filesystems", default={})
+        check_type("filesystems key", filesystems, dict)
+        for settings in filesystems:
+            check_type("filesystem item", settings, dict)
+            yield Filesystem(
+                device=settings.get("device"),
+                label=settings.get("label"),
+                uuid=settings.get("uuid"),
+                fstype=settings["type"],
+                mountpoint=settings["mount"],
+                options=settings.get("options", "defaults"),
+                dump=settings.get("dump", 0),
+                fsck=settings.get("pass", 0),
+            )

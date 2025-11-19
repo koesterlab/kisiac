@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import json
-import shutil
 from typing import Any, Self
 
 from kisiac.common import check_type, exists_cmd, run_cmd
@@ -58,7 +57,7 @@ class LVMSetup:
             entities.vgs[name] = VG(
                 name=name,
                 pvs={PV(device=pv) for pv in settings.get("pvs", [])},
-                lvs=lvs_entities
+                lvs=lvs_entities,
             )
         return entities
 
@@ -71,7 +70,13 @@ class LVMSetup:
         entities: Self = cls()
 
         # load LVM info from report
-        data = json.loads(run_cmd(["lvm", "fullreport", "--reportformat", "json_std"], host=host, sudo=True).stdout)["report"]
+        data = json.loads(
+            run_cmd(
+                ["lvm", "fullreport", "--reportformat", "json_std"],
+                host=host,
+                sudo=True,
+            ).stdout
+        )["report"]
         for entry in data:
             for vg in entry["vg"]:
                 entities.vgs[vg["vg_name"]] = VG(name=vg["vg_name"])

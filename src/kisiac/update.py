@@ -1,5 +1,12 @@
 import subprocess as sp
-from kisiac.common import HostAgnosticPath, UserError, confirm_action, run_cmd
+import sys
+from kisiac.common import (
+    GlobalSettings,
+    HostAgnosticPath,
+    UserError,
+    confirm_action,
+    run_cmd,
+)
 from kisiac import users
 from kisiac.config import Config
 from kisiac.lvm import LVMSetup
@@ -8,10 +15,20 @@ import inquirer
 
 
 def setup_config() -> None:
-    answers = inquirer.prompt([
-        inquirer.Text("secret_config", message="Paste the secret configuration (YAML format), including the repo key"),
-    ])
-    HostAgnosticPath("/etc/kisiac.yaml", sudo=True).write_text(answers["secret_config"])
+    if GlobalSettings().non_interactive:
+        content = sys.stdin.read()
+    else:
+        answers = inquirer.prompt(
+            [
+                inquirer.Text(
+                    "secret_config",
+                    message="Paste the secret configuration (YAML format), including the repo key",
+                ),
+            ]
+        )
+        assert answers is not None
+        content = answers["secret_config"]
+    HostAgnosticPath("/etc/kisiac.yaml", sudo=True).write_text(content)
 
 
 def update_host(host: str) -> None:
@@ -28,7 +45,9 @@ def update_host(host: str) -> None:
         for file in config.files.get_files(user.username):
             # If the user already has the files, we leave him the new file as a
             # template next to the actual file, with the suffix '.updated'.
-            user.fix_permissions(file.write(overwrite_existing=False, host=host, sudo=True), host=host)
+            user.fix_permissions(
+                file.write(overwrite_existing=False, host=host, sudo=True), host=host
+            )
 
 
 def update_system_packages(host: str) -> None:
@@ -54,8 +73,7 @@ def update_lvm(host: str) -> None:
         if vg.name not in desired.vgs or lv.name not in desired.vgs[vg.name].lvs
     )
     cmds.append(
-        ["vgremove", "--yes", vg]
-        for vg in current.vgs.keys() - desired.vgs.keys()
+        ["vgremove", "--yes", vg] for vg in current.vgs.keys() - desired.vgs.keys()
     )
     cmds.append(["pvremove", "--yes"] + list(current.pvs - desired.pvs))
 
@@ -137,4 +155,3 @@ def update_lvm(host: str) -> None:
                     raise UserError(
                         f"Incomplete LVM update due to error (make sure to manually fix this!): {e.stderr}"
                     )
-

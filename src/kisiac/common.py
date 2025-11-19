@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from pathlib import Path
 import subprocess as sp
+import sys
 from typing import Any, Callable, Self, Sequence
 import importlib
 import re
@@ -11,16 +13,37 @@ import inquirer
 cache = Path("~/.cache/kisiac").expanduser()
 
 
+class Singleton(object):
+    def __new__(cls, *args, **kwargs):
+        # see if the instance is already in existence. If not, make a new one.
+        if not hasattr(cls, "_instance"):
+            cls._instance = super().__new__(cls, *args, **kwargs)
+        return cls._instance
+
+
+@dataclass
+class GlobalSettings(Singleton):
+    non_interactive: bool = False
+
+
+@dataclass
+class UpdateHostSettings(Singleton):
+    hosts: list[str] = ["localhost"]  # Hosts to update
+
+
+@dataclass
+class SetupConfigSettings(Singleton):
+    repo: str  # URL to the configuration repository
+
+
 def confirm_action(desc: str) -> bool:
+    if GlobalSettings().non_interactive:
+        return True
+
     response = inquirer.prompt(
-        [
-            inquirer.Checkbox(
-                "action",
-                message=desc,
-                choices=["yes", "no"]
-            )
-        ]
+        [inquirer.Checkbox("action", message=desc, choices=["yes", "no"])]
     )
+    assert response is not None
     return response["action"] == "yes"
 
 
@@ -46,7 +69,7 @@ def run_cmd(
         cmd = ["sudo", f"bash -c '{' '.join(cmd)}'"]
     if host != "localhost":
         cmd = ["ssh", host, f"{' '.join(cmd)}"]
-    print(f"Running command: {' '.join(cmd)}")
+    print(f"Running command: {' '.join(cmd)}", file=sys.stderr)
     try:
         return sp.run(
             cmd,
@@ -59,7 +82,9 @@ def run_cmd(
         )
     except sp.CalledProcessError as e:
         if user_error:
-            raise UserError(f"Error occurred while running command '{cmd}': {e.stderr}") from e
+            raise UserError(
+                f"Error occurred while running command '{cmd}': {e.stderr}"
+            ) from e
         else:
             raise
 
@@ -102,7 +127,9 @@ def get_module_code(module_name: str) -> str:
 
 
 class HostAgnosticPath:
-    def __init__(self, path: str | Path, host: str = "localhost", sudo: bool = False) -> None:
+    def __init__(
+        self, path: str | Path, host: str = "localhost", sudo: bool = False
+    ) -> None:
         self.path = Path(path)
         self.host = host
         self.sudo = sudo
@@ -116,7 +143,7 @@ class HostAgnosticPath:
             return self.path.read_text()
         else:
             return self._run_cmd(["cat", str(self.path)]).stdout
-        
+
     def write_text(self, content: str) -> None:
         if self.is_local_and_user():
             self.path.write_text(content)
@@ -141,6 +168,7 @@ class HostAgnosticPath:
     def chown(self, user: str, group: str | None = None) -> None:
         if self.is_local_and_user():
             import shutil
+
             shutil.chown(self.path, user=user, group=group)
         else:
             owner = f"{user}:{group}" if group else user
@@ -149,7 +177,9 @@ class HostAgnosticPath:
     def is_local_and_user(self) -> bool:
         return self.host == "localhost" and not self.sudo
 
-    def _run_cmd(self, cmd: list[str], input: str | None = None, user_error: bool = True) -> sp.CompletedProcess[str]:
+    def _run_cmd(
+        self, cmd: list[str], input: str | None = None, user_error: bool = True
+    ) -> sp.CompletedProcess[str]:
         return run_cmd(
             cmd,
             input=input,
@@ -170,7 +200,7 @@ class HostAgnosticPath:
                 return True
             except sp.CalledProcessError:
                 return False
-        
+
     def is_dir(self) -> bool:
         if self.is_local_and_user():
             return self.path.is_dir()
@@ -191,8 +221,11 @@ class HostAgnosticPath:
     def parents(self) -> Sequence[Self]:
         return [type(self)(parent, host=self.host) for parent in self.path.parents]
 
-    def __rdiv__(self, other: Any) -> Self:
+    def __truediv__(self, other: Any) -> Self:
         return type(self)(self.path / other, host=self.host)
+
+    def __rtruediv__(self, other: Any) -> Self:
+        return type(self)(other / self.path, host=self.host)
 
     def __str__(self) -> str:
         if self.host == "localhost":

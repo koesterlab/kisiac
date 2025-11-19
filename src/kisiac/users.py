@@ -1,5 +1,4 @@
 import grp
-from pathlib import Path
 import pwd
 
 from kisiac.common import HostAgnosticPath, run_cmd
@@ -8,7 +7,7 @@ from kisiac.config import Config
 
 def setup_users(host: str) -> None:
     # create group if it does not exist
-    if not run_cmd([, "koesterlab"], host=host):
+    if run_cmd(["getent", "group", "koesterlab"], host=host).returncode == 2:
         print("Creating group: koesterlab")
         run_cmd(["groupadd", "koesterlab"], host=host, sudo=True)
 
