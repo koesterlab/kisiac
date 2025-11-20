@@ -59,7 +59,7 @@ def run_cmd(
     """Run a system command using subprocess.run and check for errors."""
     # TODO check quotation!
     if sudo:
-        cmd = ["sudo", "bash", "-c", "'{' '.join(cmd)}'"]
+        cmd = ["sudo", "bash", "-c", f"'{' '.join(cmd)}'"]
     if host != "localhost":
         cmd = ["ssh", host, f"{' '.join(cmd)}"]
     print(f"Running command: {' '.join(cmd)}", file=sys.stderr)
