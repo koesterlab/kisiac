@@ -23,7 +23,7 @@ class Singleton(object):
 
 def confirm_action(desc: str) -> bool:
     from kisiac.runtime_settings import GlobalSettings
-    
+
     if GlobalSettings().non_interactive:
         return True
 
