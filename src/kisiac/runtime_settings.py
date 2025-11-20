@@ -44,7 +44,7 @@ class SettingsBase(Singleton):
     @classmethod
     def from_cli_args(cls, args: Namespace) -> Self:
         def arg_to_field_value(cls_field: Field):
-            value = getattr(args, cls_field.name.replace("_", "-"))
+            value = getattr(args, cls_field.name)
             if cls_field.default_factory is not None and value is None:
                 assert callable(cls_field.default_factory)
                 value = cls_field.default_factory()
