@@ -27,6 +27,8 @@ def main() -> None:
     try:
         parser = get_argument_parser()
         args = parser.parse_args()
+        GlobalSettings.from_cli_args(args)
+        UpdateHostSettings.from_cli_args(args)
         match args.subcommand:
             case "update-hosts":
                 for host in args.update_host_settings.hosts:
