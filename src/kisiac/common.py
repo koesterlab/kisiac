@@ -18,13 +18,19 @@ class Singleton(object):
     def __new__(cls, *args, **kwargs) -> Self:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            cls._instance.__init__(*args, **kwargs)
+        return cls._instance
+
+    @classmethod
+    def get_instance(cls) -> Self:
+        assert cls._instance is not None
         return cls._instance
 
 
 def confirm_action(desc: str) -> bool:
     from kisiac.runtime_settings import GlobalSettings
 
-    if GlobalSettings().non_interactive:
+    if GlobalSettings.get_instance().non_interactive:
         return True
 
     response = inquirer.prompt(
