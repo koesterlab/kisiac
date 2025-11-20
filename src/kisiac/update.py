@@ -1,12 +1,12 @@
 import subprocess as sp
 import sys
 from kisiac.common import (
-    GlobalSettings,
     HostAgnosticPath,
     UserError,
     confirm_action,
     run_cmd,
 )
+from kisiac.runtime_settings import GlobalSettings
 from kisiac import users
 from kisiac.config import Config
 from kisiac.lvm import LVMSetup

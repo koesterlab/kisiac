@@ -262,7 +262,7 @@ class Config(Singleton):
         return yaml.dump(self._config)
 
     def get(self, key: str, default: Any | None = required_marker) -> Any:
-        value = self._config.get(key, default=default)
+        value = self._config.get(key, default)
 
         if value is required_marker:
             raise UserError(f"Config lacks key {key}.")

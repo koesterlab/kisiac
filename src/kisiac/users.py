@@ -36,9 +36,8 @@ def setup_users(host: str) -> None:
         sshdir.chown(user.username, user.usergroup)
         sshdir.chmod(0o700)
         auth_keys_file = sshdir / "authorized_keys"
-        with auth_keys_file.open("w", encoding="utf-8") as f:
-            f.write(user.ssh_pub_key + "\n")
-        user.fix_permissions(auth_keys_file, host=host)
+        auth_keys_file.write_text(user.ssh_pub_key + "\n")
+        user.fix_permissions([auth_keys_file.path], host=host)
 
 
 def is_existing_user(username: str) -> bool:

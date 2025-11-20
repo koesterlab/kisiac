@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from pathlib import Path
 import subprocess as sp
 import sys
@@ -8,6 +7,8 @@ import re
 import textwrap
 
 import inquirer
+
+from kisiac.runtime_settings import GlobalSettings
 
 
 cache = Path("~/.cache/kisiac").expanduser()
@@ -20,18 +21,6 @@ class Singleton(object):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-
-
-@dataclass
-class GlobalSettings(Singleton):
-    non_interactive: bool = False
-
-
-@dataclass
-class UpdateHostSettings(Singleton):
-    hosts: list[str] = field(
-        default_factory=lambda: ["localhost"], metadata={"required": True}
-    )  # Hosts to update
 
 
 def confirm_action(desc: str) -> bool:
