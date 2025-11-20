@@ -35,6 +35,10 @@ class SettingsBase(Singleton):
                 kwargs["default"] = default
                 kwargs["type"] = arg_type
                 kwargs["nargs"] = "+" if cls_field.type == list[str] else None
+            
+            metavar = cls_field.metadata.get("metavar", None)
+            if metavar is not None:
+                kwargs["metavar"] = metavar
 
             parser.add_argument(
                 f"--{arg_name}" if not positional else arg_name,
@@ -71,5 +75,6 @@ class UpdateHostSettings(SettingsBase):
             "required": True,
             "positional": True,
             "help": "Hosts to update (default: localhost)",
+            "metavar": "HOST",
         },
     )
