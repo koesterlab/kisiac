@@ -15,6 +15,7 @@ class SettingsBase(Singleton):
             arg_name = cls_field.name.replace("_", "-")
 
             parse_method = getattr(cls, f"parse_{cls_field.name}", None)
+            arg_type = parse_method or cls_field.type
 
             default = None
             if callable(cls_field.default_factory):
@@ -23,13 +24,17 @@ class SettingsBase(Singleton):
                 default = cls_field.default
 
             kwargs = dict(
-                type=parse_method or cls_field.type,
                 help=cls_field.metadata["help"],
-                default=default,
-                nargs="+" if cls_field.type == list[str] else None,
             )
             if cls_field.metadata.get("required", False) and not positional:
                 kwargs["required"] = True
+
+            if arg_type is bool:
+                kwargs["action"] = "store_true" if not default else "store_false"
+            else:
+                kwargs["default"] = default
+                kwargs["type"] = arg_type
+                kwargs["nargs"] = "+" if cls_field.type == list[str] else None
 
             parser.add_argument(
                 f"--{arg_name}" if not positional else arg_name,
