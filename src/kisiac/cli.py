@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from kisiac.common import UserError
 from kisiac.runtime_settings import (
@@ -9,10 +9,10 @@ from kisiac.update import setup_config, update_host
 
 
 def get_argument_parser() -> ArgumentParser:
-    parser = ArgumentParser()
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     GlobalSettings.register_cli_args(parser)
     subparsers = parser.add_subparsers(dest="subcommand", help="subcommand help")
-    update_hosts = subparsers.add_parser("update-hosts", help="Update given hosts")
+    update_hosts = subparsers.add_parser("update-hosts", help="Update given hosts", formatter_class=ArgumentDefaultsHelpFormatter)
     UpdateHostSettings.register_cli_args(update_hosts)
     subparsers.add_parser("setup-config", help="Setup the kisiac configuration")
 

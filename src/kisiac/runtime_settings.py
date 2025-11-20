@@ -9,13 +9,31 @@ class SettingsBase(Singleton):
     @classmethod
     def register_cli_args(cls, parser: ArgumentParser) -> None:
         for cls_field in fields(cls):
+            positional = cls_field.metadata.get("positional", False)
+
             arg_name = cls_field.name.replace("_", "-")
+
+
             parse_method = getattr(cls, f"parse_{cls_field.name}", None)
-            parser.add_argument(
-                f"--{arg_name}",
+            
+            default = None
+            if callable(cls_field.default_factory):
+                default = cls_field.default_factory()
+            elif cls_field.default is not None:
+                default = cls_field.default
+
+            kwargs = dict(
                 type=parse_method or cls_field.type,
                 help=cls_field.metadata["help"],
-                default=cls_field.default,
+                default=default,
+                nargs="+" if cls_field.type == list[str] else None,
+            )
+            if cls_field.metadata.get("required", False) and not positional:
+                kwargs["required"] = True
+
+            parser.add_argument(
+                f"--{arg_name}" if not positional else arg_name,
+                **kwargs,
             )
 
     @classmethod
@@ -39,5 +57,5 @@ class GlobalSettings(SettingsBase):
 @dataclass
 class UpdateHostSettings(SettingsBase):
     hosts: list[str] = field(
-        default_factory=lambda: ["localhost"], metadata={"required": True, "help": "Hosts to update"}
+        default_factory=lambda: ["localhost"], metadata={"required": True, "positional": True, "help": "Hosts to update (default: localhost)"}
     )

@@ -36,4 +36,4 @@ jobs:
           sudo losetup -d /dev/loop0
       - shell: pixi run bash -e {0}
         run: |
-          kisiac --non-interactive update-hosts --hosts localhost
+          kisiac --non-interactive update-hosts localhost
