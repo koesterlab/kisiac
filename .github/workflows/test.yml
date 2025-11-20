@@ -23,6 +23,8 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0
       - shell: pixi run bash -e {0}
         run: |
+          ls /etc
+          echo "test: true" | sudo bash -c 'tee /etc/kisiac.yaml'
           kisiac --non-interactive setup-config << EOF
           repo: .test/repo
           infrastructure_name: test-infra
