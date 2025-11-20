@@ -99,6 +99,25 @@ class Filesystem:
         )
 
 
+class UserSet(Enum):
+    nobody = "nobody"
+    owner = "owner"
+    group = "group"
+    others = "others"
+
+
+@dataclass
+class Permissions:
+    owner: str | None
+    group: str | None
+    read: UserSet | None
+    write: UserSet | None
+    execute: UserSet | None
+    setgid: bool
+    setuid: bool
+    sticky: bool
+
+
 @dataclass
 class File:
     target_path: Path
@@ -365,3 +384,22 @@ class Config(Singleton):
                 dump=settings.get("dump", 0),
                 fsck=settings.get("pass", 0),
             )
+
+    @property
+    def permissions(self) -> dict[Path, Permissions]:
+        check_type("permissions key", self._config.get("permissions", {}), dict)
+        permissions = {}
+        for path_str, settings in self._config.get("permissions", {}).items():
+            check_type(f"permissions for {path_str}", settings, dict)
+            path = Path(path_str)
+            permissions[path] = Permissions(
+                owner=settings.get("owner"),
+                group=settings.get("group"),
+                read=UserSet(settings["read"]) if "read" in settings else None,
+                write=UserSet(settings["write"]) if "write" in settings else None,
+                execute=UserSet(settings["execute"]) if "execute" in settings else None,
+                setgid=settings.get("setgid", False),
+                setuid=settings.get("setuid", False),
+                sticky=settings.get("sticky", False),
+            )
+        return permissions

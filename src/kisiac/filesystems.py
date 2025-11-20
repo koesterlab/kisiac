@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 from kisiac.common import HostAgnosticPath, confirm_action, run_cmd
-from kisiac.config import Config, Filesystem
+from kisiac.config import Config, Filesystem, UserSet
 
 from pyfstab import Fstab
 
@@ -44,6 +44,60 @@ def update_filesystems(host: str) -> None:
             filesystem.to_fstab_entry() for filesystem in sorted(filesystems)
         ]
         fstab_path.write_text(new_fstab.write_string())
+
+
+def update_permissions(host: str) -> None:
+    def apply_user_set(user_set: UserSet | None, flag: str) -> list[str]:
+        if user_set is None:
+            return []
+        if user_set == UserSet.owner:
+            return [f"u+{flag}", f"g-{flag}", f"o-{flag}"]
+        elif user_set == UserSet.group:
+            return [f"u+{flag}", f"g+{flag}", f"o-{flag}"]
+        elif user_set == UserSet.others:
+            return [f"u+{flag}", f"g+{flag}", f"o+{flag}"]
+        elif user_set == UserSet.nobody:
+            return [f"u-{flag}", f"g-{flag}", f"o-{flag}"]
+        else:
+            assert False, "unreachable"
+
+    permissions = Config().permissions
+    for path, permissions in permissions.items():
+        path = HostAgnosticPath(path, host=host, sudo=True)
+        chmod_args = []
+        if permissions.setgid:
+            chmod_args.append("g+s")
+        if permissions.setuid:
+            chmod_args.append("u+s")
+        if permissions.sticky:
+            chmod_args.append("+t")
+        chmod_args.extend(apply_user_set(permissions.read, "x"))
+        chmod_args.extend(apply_user_set(permissions.write, "x"))
+        chmod_args.extend(apply_user_set(permissions.execute, "x"))
+        if chmod_args:
+            if path.is_dir():
+                chmod_args.insert(0, "-R")
+            run_cmd(
+                ["chmod"] + chmod_args + [str(path.path)],
+                sudo=True,
+                host=host,
+            )
+
+        if permissions.owner is not None:
+            chown_args = permissions.owner
+            if permissions.group is not None:
+                chown_args += f":{permissions.group}"
+            run_cmd(
+                ["chown", chown_args, str(path.path)],
+                sudo=True,
+                host=host,
+            )
+        elif permissions.group is not None:
+            run_cmd(
+                ["chgrp", permissions.group, str(path.path)],
+                sudo=True,
+                host=host,
+            )
 
 
 @dataclass

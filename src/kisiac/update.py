@@ -6,6 +6,7 @@ from kisiac.common import (
     confirm_action,
     run_cmd,
 )
+from kisiac.filesystems import update_filesystems
 from kisiac.runtime_settings import GlobalSettings
 from kisiac import users
 from kisiac.config import Config
@@ -48,6 +49,8 @@ def update_host(host: str) -> None:
             user.fix_permissions(
                 file.write(overwrite_existing=False, host=host, sudo=True), host=host
             )
+
+    update_filesystems(host)
 
 
 def update_system_packages(host: str) -> None:
