@@ -35,7 +35,7 @@ class SettingsBase(Singleton):
                 kwargs["default"] = default
                 kwargs["type"] = arg_type
                 kwargs["nargs"] = "+" if cls_field.type == list[str] else None
-            
+
             metavar = cls_field.metadata.get("metavar", None)
             if metavar is not None:
                 kwargs["metavar"] = metavar
