@@ -141,6 +141,7 @@ class Files:
     def __init__(self, config: "Config") -> None:
         cache_address = base64.b64encode(config.repo.encode()).decode()
         self.repo_cache = cache / cache_address
+        self.repo_cache.mkdir(exist_ok=True, parents=True)
         self.repo = git.Repo(self.repo_cache)
         self.infrastructure = config.infrastructure
         self.vars = config.vars
