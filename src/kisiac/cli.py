@@ -1,7 +1,6 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from kisiac.common import UserError
-from kisiac.config import Config
 from kisiac.runtime_settings import (
     GlobalSettings,
     UpdateHostSettings,
