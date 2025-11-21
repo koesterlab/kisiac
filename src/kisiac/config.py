@@ -144,6 +144,7 @@ class Files:
         self.infrastructure = config.infrastructure
         self.vars = config.vars
         self.user_vars = config.user_vars
+        print(list(cache.iterdir()))
         if not self.repo_cache.exists():
             self.repo_cache.parent.mkdir(parents=True, exist_ok=True)
             self.repo_cache.parent.mkdir(exist_ok=True)
