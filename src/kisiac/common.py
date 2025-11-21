@@ -211,7 +211,7 @@ class HostAgnosticPath:
                 return False
 
     def with_suffix(self, suffix: str) -> Self:
-        return type(self)(self.path.with_suffix(suffix))
+        return type(self)(self.path.with_suffix(suffix), host=self.host, sudo=self.sudo)
 
     @property
     def parents(self) -> Sequence[Self]:
