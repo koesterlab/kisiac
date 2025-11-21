@@ -9,6 +9,7 @@ user_software:
     with: snakemake-storage-plugin-s3
     desc: for running workflows
   - pkg: conda
+    desc: only for snakemake internal use, use pixi instead
   - pkg: exa
     desc: for listing files (ls replacement)
   - pkg: s5cmd
