@@ -14,14 +14,10 @@ cache = Path("~/.cache/kisiac").expanduser()
 
 
 class Singleton:
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "_instance") or cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
     @classmethod
-    def get_instance(cls) -> Self:
-        assert cls._instance is not None
+    def get_instance(cls, *args, **kwargs) -> Self:
+        if not hasattr(cls, "_instance") or cls._instance is None:
+            cls._instance = cls(*args, **kwargs)
         return cls._instance
 
 

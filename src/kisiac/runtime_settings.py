@@ -53,7 +53,7 @@ class SettingsBase(Singleton):
         kwargs = {
             cls_field.name: getattr(args, cls_field.name) for cls_field in fields(cls)
         }
-        return cls(**kwargs)
+        return cls.get_instance(**kwargs)
 
 
 @dataclass
