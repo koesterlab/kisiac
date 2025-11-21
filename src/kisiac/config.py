@@ -136,9 +136,9 @@ class File:
         for ancestor in target_path.parents[::-1][1:]:
             if not ancestor.exists():
                 ancestor.mkdir()
-                created.append(ancestor)
+                created.append(ancestor.path)
         target_path.write_text(self.content)
-        created.append(target_path)
+        created.append(target_path.path)
         return created
 
 
