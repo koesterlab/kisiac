@@ -71,33 +71,12 @@ def update_permissions(host: str) -> None:
             chmod_args.append("u+s")
         if permissions.sticky:
             chmod_args.append("+t")
-        chmod_args.extend(apply_user_set(permissions.read, "x"))
-        chmod_args.extend(apply_user_set(permissions.write, "x"))
+        chmod_args.extend(apply_user_set(permissions.read, "r"))
+        chmod_args.extend(apply_user_set(permissions.write, "w"))
         chmod_args.extend(apply_user_set(permissions.execute, "x"))
         if chmod_args:
-            if path.is_dir():
-                chmod_args.insert(0, "-R")
-            run_cmd(
-                ["chmod"] + chmod_args + [str(path.path)],
-                sudo=True,
-                host=host,
-            )
-
-        if permissions.owner is not None:
-            chown_args = permissions.owner
-            if permissions.group is not None:
-                chown_args += f":{permissions.group}"
-            run_cmd(
-                ["chown", chown_args, str(path.path)],
-                sudo=True,
-                host=host,
-            )
-        elif permissions.group is not None:
-            run_cmd(
-                ["chgrp", permissions.group, str(path.path)],
-                sudo=True,
-                host=host,
-            )
+            path.chmod(*chmod_args)
+        path.chown(permissions.owner, permissions.group)
 
 
 @dataclass

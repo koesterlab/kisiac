@@ -236,9 +236,9 @@ class User:
             path = HostAgnosticPath(path, host=host, sudo=True)
             # ensure that only user may read/write the paths
             if path.is_dir():
-                path.chmod(0o700)
+                path.chmod("u=rwx", "go-rwx")
             else:
-                path.chmod(0o600)
+                path.chmod("u=rw", "go-rwx")
             path.chown(self.username, self.usergroup)
 
 
