@@ -20,6 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: setup test repo
+        run: |
+          git init .test/repo
+          git config user.name "Test User"
+          git config user.email "test@test.com"
+          git add .test/repo/*
+          git commit -m "Initial commit"
       - uses: prefix-dev/setup-pixi@v0
       - name: setup kisiac config
         shell: pixi run bash -e {0}
