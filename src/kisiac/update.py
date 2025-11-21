@@ -57,7 +57,11 @@ def update_system_packages(host: str) -> None:
     run_cmd(["apt-get", "update"], sudo=True, host=host)
     if not GlobalSettings.get_instance().skip_system_upgrade:
         run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
-    run_cmd(["apt-get", "install"] + Config.get_instance().system_software, sudo=True, host=host)
+    run_cmd(
+        ["apt-get", "install"] + Config.get_instance().system_software,
+        sudo=True,
+        host=host,
+    )
 
 
 def update_lvm(host: str) -> None:
