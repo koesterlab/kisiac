@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, fields, Field
 from argparse import ArgumentParser, Namespace
-from typing import Self
+from typing import Self, get_args, get_origin
 
 from kisiac.common import Singleton
 
@@ -33,8 +33,11 @@ class SettingsBase(Singleton):
                 kwargs["action"] = "store_true" if not default else "store_false"
             else:
                 kwargs["default"] = default
-                kwargs["type"] = arg_type
-                kwargs["nargs"] = "+" if cls_field.type == list[str] else None
+                if cls_field.type is list or get_origin(cls_field.type) is list:
+                    kwargs["type"] = get_args(cls_field.type)[0]
+                    kwargs["nargs"] = "+"
+                else:
+                    kwargs["type"] = arg_type
 
             metavar = cls_field.metadata.get("metavar", None)
             if metavar is not None:
@@ -47,15 +50,8 @@ class SettingsBase(Singleton):
 
     @classmethod
     def from_cli_args(cls, args: Namespace) -> Self:
-        def arg_to_field_value(cls_field: Field):
-            value = getattr(args, cls_field.name)
-            if cls_field.default_factory is not None and value is None:
-                assert callable(cls_field.default_factory)
-                value = cls_field.default_factory()
-            return value
-
         kwargs = {
-            cls_field.name: arg_to_field_value(cls_field) for cls_field in fields(cls)
+            cls_field.name: getattr(args, cls_field.name) for cls_field in fields(cls)
         }
         return cls(**kwargs)
 

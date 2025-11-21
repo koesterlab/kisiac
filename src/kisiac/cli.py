@@ -31,6 +31,7 @@ def main() -> None:
         match args.subcommand:
             case "update-hosts":
                 UpdateHostSettings.from_cli_args(args)
+                breakpoint()
                 for host in UpdateHostSettings.get_instance().hosts:
                     update_host(host)
             case "setup-config":

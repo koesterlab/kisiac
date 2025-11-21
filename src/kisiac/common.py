@@ -25,7 +25,6 @@ class Singleton:
         return cls._instance
 
 
-
 def confirm_action(desc: str) -> bool:
     from kisiac.runtime_settings import GlobalSettings
 
