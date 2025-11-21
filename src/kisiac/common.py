@@ -91,9 +91,13 @@ class UserError(Exception):
     pass
 
 
-def check_type(item: str, value: Any, type: Any) -> None:
-    if not isinstance(value, type):
-        raise UserError(f"Expecting url for {item}, found {type(value)} ({value}).")
+def check_type(item: str, value: Any, expected_type: Any) -> None:
+    print(expected_type)
+    if not isinstance(value, expected_type):
+        raise UserError(
+            f"Expecting {expected_type} for {item}, found "
+            f"value {value} of type {type(value)}."
+        )
 
 
 module_import_re: re.Pattern = re.compile(

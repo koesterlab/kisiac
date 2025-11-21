@@ -21,7 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: prefix-dev/setup-pixi@v0
-      - shell: pixi run bash -e {0}
+      - name: setup kisiac config
+        shell: pixi run bash -e {0}
         run: |
           ls /etc
           echo "test: true" | sudo bash -c 'tee /etc/kisiac.yaml'
@@ -29,13 +30,19 @@ jobs:
           repo: .test/repo
           infrastructure_name: test-infra
           EOF
-      - run: |
+      - name: fake block device
+        run: |
           # Create a fake block device
           head -c 10240 /dev/zero > /tmp/zeroes
           # Use it as a block device
           sudo losetup /dev/loop0 /tmp/zeroes
           # Remove the device
           sudo losetup -d /dev/loop0
-      - shell: pixi run bash -e {0}
+      - name: update-hosts first run
+        shell: pixi run bash -e {0}
+        run: |
+          kisiac --non-interactive update-hosts localhost
+      - name: update-hosts second run
+        shell: pixi run bash -e {0}
         run: |
           kisiac --non-interactive update-hosts localhost
