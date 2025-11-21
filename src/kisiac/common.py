@@ -59,7 +59,6 @@ def run_cmd(
             cmd = ["ssh", host, f"sudo bash -c '{' '.join(cmd)}'"]
         else:
             cmd = ["ssh", host, f"{' '.join(cmd)}"]
-    print(cmd)
     print(f"Running command: {' '.join(cmd)}", file=sys.stderr)
     try:
         return sp.run(
@@ -74,7 +73,7 @@ def run_cmd(
     except sp.CalledProcessError as e:
         if user_error:
             raise UserError(
-                f"Error occurred while running command '{cmd}': {e.stderr}"
+                f"Error occurred while running command '{' '.join(cmd)}': {e.stderr}"
             ) from e
         else:
             raise
@@ -151,7 +150,7 @@ class HostAgnosticPath:
         if self.is_local_and_user():
             self.path.mkdir(parents=True, exist_ok=True)
         else:
-            self._run_cmd(["mkdir", "-p"])
+            self._run_cmd(["mkdir", "-p", str(self.path)])
 
     def chmod(self, mode: int) -> None:
         if self.is_local_and_user():
