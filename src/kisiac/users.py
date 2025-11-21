@@ -32,9 +32,9 @@ def setup_users(host: str) -> None:
                 sudo=True,
             )
         else:
-            print(f"Updating user: {user}")
+            print(f"Updating user: {user.username}")
 
-        sshdir = HostAgnosticPath(f"~{user}/.ssh", host=host, sudo=True)
+        sshdir = HostAgnosticPath(f"~{user.username}/.ssh", host=host, sudo=True)
         sshdir.mkdir()
         sshdir.chown(user.username, user.usergroup)
         sshdir.chmod(0o700)
