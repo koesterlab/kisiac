@@ -48,6 +48,7 @@ def run_cmd(
     env: dict[str, Any] | None = None,
     sudo: bool = False,
     user_error: bool = True,
+    check: bool = True,
 ) -> sp.CompletedProcess[str]:
     """Run a system command using subprocess.run and check for errors."""
     # TODO check quotation!
@@ -63,7 +64,7 @@ def run_cmd(
     try:
         return sp.run(
             cmd,
-            check=True,
+            check=check,
             text=True,
             stdout=sp.PIPE,
             stderr=sp.PIPE,

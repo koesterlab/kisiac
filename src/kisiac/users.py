@@ -7,7 +7,10 @@ from kisiac.config import Config
 
 def setup_users(host: str) -> None:
     # create group if it does not exist
-    if run_cmd(["getent", "group", "koesterlab"], host=host).returncode == 2:
+    if (
+        run_cmd(["getent", "group", "koesterlab"], check=False, host=host).returncode
+        == 2
+    ):
         print("Creating group: koesterlab")
         run_cmd(["groupadd", "koesterlab"], host=host, sudo=True)
 
