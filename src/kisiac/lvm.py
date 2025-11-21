@@ -72,7 +72,7 @@ class LVMSetup:
         # load LVM info from report
         data = json.loads(
             run_cmd(
-                ["lvm", "fullreport", "--reportformat", "json_std"],
+                ["lvm", "fullreport", "--reportformat", "json"],
                 host=host,
                 sudo=True,
             ).stdout
