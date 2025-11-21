@@ -105,7 +105,7 @@ class DeviceInfos:
             device, attrs = entry.split(":", maxsplit=1)
             attrs = {
                 match.group("attr"): match.group("value")
-                for match in blkid_attrs_re.findall(attrs)
+                for match in blkid_attrs_re.finditer(attrs)
             }
             self.infos.append(
                 DeviceInfo(
