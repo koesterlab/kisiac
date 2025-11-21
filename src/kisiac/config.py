@@ -155,9 +155,10 @@ class Files:
             self.repo = git.Repo.clone_from(config.repo, self.repo_cache)
         else:
             self.repo = git.Repo(self.repo_cache)
-            # update to latest commit
-            self.repo.remotes.origin.fetch()
-            self.repo.git.reset("--hard", "origin/main")
+            if self.repo.remotes:
+                # update to latest commit
+                self.repo.remotes.origin.pull()
+
 
     def infrastructure_stack(self) -> Iterable[Path]:
         base = self.repo_cache / "infrastructure"
