@@ -141,15 +141,15 @@ class Files:
     def __init__(self, config: "Config") -> None:
         cache_address = base64.b64encode(config.repo.encode()).decode()
         self.repo_cache = cache / cache_address
-        self.repo_cache.mkdir(exist_ok=True, parents=True)
-        self.repo = git.Repo(self.repo_cache)
         self.infrastructure = config.infrastructure
         self.vars = config.vars
         self.user_vars = config.user_vars
         if not self.repo_cache.exists():
+            self.repo_cache.parent.mkdir(parents=True, exist_ok=True)
             self.repo_cache.parent.mkdir(exist_ok=True)
-            self.repo.clone_from(config.repo, self.repo_cache)
+            self.repo = git.Repo.clone_from(config.repo, self.repo_cache)
         else:
+            self.repo = git.Repo(self.repo_cache)
             # update to latest commit
             self.repo.remotes.origin.fetch()
             self.repo.git.reset("--hard", "origin/main")
