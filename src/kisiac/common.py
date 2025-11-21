@@ -153,7 +153,7 @@ class HostAgnosticPath:
             self._run_cmd(["mkdir", "-p", str(self.path)])
 
     def chmod(self, *mode: str) -> None:
-        self._chperm("chmod", mode)
+        self._chperm("chmod", ",".join(mode))
 
     def chown(self, user: str | None, group: str | None = None) -> None:
         if user is not None:
