@@ -353,13 +353,13 @@ class Config(Singleton):
 
     @property
     def system_software(self) -> list[str]:
-        system_software = self.get("system_software")
+        system_software = self.get("system_software", default=[])
         check_type("system_software key", system_software, list)
         return system_software
 
     @property
     def messages(self) -> Sequence[str]:
-        messages = self.get("messages")
+        messages = self.get("messages", default=[])
         check_type("message key", messages, list)
         return messages
 
