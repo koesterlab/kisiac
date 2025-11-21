@@ -218,10 +218,10 @@ class HostAgnosticPath:
         return [type(self)(parent, host=self.host) for parent in self.path.parents]
 
     def __truediv__(self, other: Any) -> Self:
-        return type(self)(self.path / other, host=self.host)
+        return type(self)(self.path / other, host=self.host, sudo=self.sudo)
 
     def __rtruediv__(self, other: Any) -> Self:
-        return type(self)(other / self.path, host=self.host)
+        return type(self)(other / self.path, host=self.host, sudo=self.sudo)
 
     def __str__(self) -> str:
         if self.host == "localhost":
