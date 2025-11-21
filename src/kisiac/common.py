@@ -64,6 +64,7 @@ def run_cmd(
             cmd = ["ssh", host, f"sudo bash -c '{' '.join(cmd)}'"]
         else:
             cmd = ["ssh", host, f"{' '.join(cmd)}"]
+    print(cmd)
     print(f"Running command: {' '.join(cmd)}", file=sys.stderr)
     try:
         return sp.run(
