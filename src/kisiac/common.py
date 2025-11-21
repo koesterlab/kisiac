@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess as sp
+from functools import wraps
 import sys
 from typing import Any, Callable, Self, Sequence
 import importlib
@@ -12,25 +13,23 @@ import inquirer
 cache = Path("~/.cache/kisiac").expanduser()
 
 
-class Singleton(object):
-    _instance: Self | None = None
+def singleton(cls):
+    instance = None
 
-    def __new__(cls, *args, **kwargs) -> Self:
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance.__init__(*args, **kwargs)
-        return cls._instance
+    @wraps(cls)
+    def wrapper(*args, **kwargs):
+        nonlocal instance
+        if instance is None:
+            instance = cls(*args, **kwargs)
+        return instance
 
-    @classmethod
-    def get_instance(cls) -> Self:
-        assert cls._instance is not None
-        return cls._instance
+    return wrapper
 
 
 def confirm_action(desc: str) -> bool:
     from kisiac.runtime_settings import GlobalSettings
 
-    if GlobalSettings.get_instance().non_interactive:
+    if GlobalSettings().non_interactive:
         return True
 
     response = inquirer.prompt(
