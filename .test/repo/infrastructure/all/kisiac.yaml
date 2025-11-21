@@ -10,11 +10,17 @@ user_software:
     desc: for running workflows
   - pkg: conda
     desc: only for snakemake internal use, use pixi instead
+    post_install: |
+      conda init
+      conda config --set auto_activate_base false
   - pkg: exa
     desc: for listing files (ls replacement)
   - pkg: s5cmd
     desc: for accessing s3
   - pkg: starship
+    desc: for a fancy shell prompt
+    post_install: |
+      echo 'eval "\$(starship init bash)"' >> ~/.bashrc
   - pkg: ripgrep
     cmd: rg
     desc: for searching text (grep replacement)
@@ -24,8 +30,12 @@ user_software:
     desc: for text replacing in files (sed replacement)
   - pkg: fzf
     desc: for fuzzy finding files
+    post_install: |
+      echo 'eval "\$(fzf --bash)"' >> ~/.bashrc
   - pkg: zoxide
     desc: for quickly navigating the filesystem (cd replacement)
+    post_install: |
+      echo 'eval "\$(zoxide init bash)"' >> ~/.bashrc
   - pkg: nbterm
     with:
       - ipykernel

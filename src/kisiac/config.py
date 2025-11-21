@@ -27,6 +27,7 @@ class Package:
     cmd_spec: str | None
     desc: str
     with_pkgs: list[str]
+    post_install: str | None
 
     @property
     def cmd(self) -> str:
@@ -34,8 +35,12 @@ class Package:
 
     @property
     def install_cmd(self) -> str:
-        with_pkgs = " ".join(f"--with {pkg}" for pkg in self.with_pkgs)
-        return f"pixi global install {self.name} {with_pkgs}"
+        supplement = " ".join(f"--with {pkg}" for pkg in self.with_pkgs)
+
+        if self.post_install:
+            supplement += " && ".join(self.post_install.splitlines())
+
+        return f"pixi global install {self.name} {supplement}"
 
 
 class FileType(Enum):
@@ -347,6 +352,7 @@ class Config(Singleton):
                     cmd_spec=entry.get("cmd"),
                     desc=entry["desc"],
                     with_pkgs=entry.get("with", []),
+                    post_install=entry.get("post_install"),
                 )
             except KeyError as e:
                 raise UserError(f"Missing {e} in user_software definition.")

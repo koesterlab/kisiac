@@ -17,7 +17,7 @@ def setup_users(host: str) -> None:
     for user in Config.get_instance().users:
         # create user if it does not exist
         if not is_existing_user(user.username):
-            print(f"Creating user: {user}")
+            print(f"Creating user: {user.username}")
             run_cmd(
                 [
                     "useradd",
