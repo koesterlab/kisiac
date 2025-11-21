@@ -158,14 +158,14 @@ class HostAgnosticPath:
     def chown(self, user: str | None, group: str | None = None) -> None:
         if user is not None:
             owner = f"{user}:{group}" if group else user
-            self._chperm("chown", [owner])
+            self._chperm("chown", owner)
         elif group is not None:
-            self._chperm("chgrp", [group])
+            self._chperm("chgrp", group)
         else:
             raise ValueError("Either user or group must be provided.")
 
-    def _chperm(self, cmd: str, args: Sequence[str]) -> None:
-        args = list(args)
+    def _chperm(self, cmd: str, arg: str) -> None:
+        args = [arg]
         if self.is_dir():
             args = ["-R"] + args
         self._run_cmd([cmd] + args + [str(self.path)])
