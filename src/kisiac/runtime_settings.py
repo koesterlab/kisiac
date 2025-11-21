@@ -2,11 +2,11 @@ from dataclasses import dataclass, field, fields, Field
 from argparse import ArgumentParser, Namespace
 from typing import Self
 
-from kisiac.common import singleton
+from kisiac.common import Singleton
 
 
 @dataclass
-class SettingsBase:
+class SettingsBase(Singleton):
     @classmethod
     def register_cli_args(cls, parser: ArgumentParser) -> None:
         for cls_field in fields(cls):
@@ -60,7 +60,6 @@ class SettingsBase:
         return cls(**kwargs)
 
 
-@singleton
 @dataclass
 class GlobalSettings(SettingsBase):
     non_interactive: bool = field(
@@ -68,7 +67,6 @@ class GlobalSettings(SettingsBase):
     )
 
 
-@singleton
 @dataclass
 class UpdateHostSettings(SettingsBase):
     hosts: list[str] = field(

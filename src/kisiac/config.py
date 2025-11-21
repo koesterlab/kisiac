@@ -11,7 +11,7 @@ import yaml
 import git
 from pyfstab.entry import Entry as FstabEntry
 
-from kisiac.common import HostAgnosticPath, cache, UserError, check_type, singleton
+from kisiac.common import HostAgnosticPath, Singleton, cache, UserError, check_type, singleton
 from kisiac.lvm import LVMSetup
 
 
@@ -242,8 +242,7 @@ class User:
             path.chown(self.username, self.usergroup)
 
 
-@singleton
-class Config:
+class Config(Singleton):
     def __init__(self) -> None:
         # Config is bootstrapped via an env variable that contains YAML or the file config_file_path.
         # It at least has to contain the repo: ... key that points to a

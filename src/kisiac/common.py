@@ -13,17 +13,24 @@ import inquirer
 cache = Path("~/.cache/kisiac").expanduser()
 
 
-def singleton(cls):
-    instance = None
+class Singleton:
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._instance = None         # each subclass gets its own instance
+        cls._initialized = False     # and its own init flag
 
-    @wraps(cls)
-    def wrapper(*args, **kwargs):
-        nonlocal instance
-        if instance is None:
-            instance = cls(*args, **kwargs)
-        return instance
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
-    return wrapper
+    def __init__(self, *args, **kwargs):
+        if self._initialized:
+            return  # skip repeated initialization
+        # one-time initialization logic goes here
+        super().__init__(*args, **kwargs)
+        self._initialized = True
+
 
 
 def confirm_action(desc: str) -> bool:
