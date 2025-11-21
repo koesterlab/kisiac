@@ -204,12 +204,18 @@ class Files:
                 autoescape=jinja2.select_autoescape(),
             )
             content = templates.get_template("kisiac.sh.j2").render(
-                packages=Config.get_instance().user_software
+                packages=Config.get_instance().user_software,
+                infrastructure_name=Config.get_instance().infrastructure_name,
+                infrastructure_name_len=len(
+                    Config.get_instance().infrastructure_name
+                ),
+                messages=Config.get_instance().messages,
             )
             yield File(target_path=Path("/etc/profile.d/kisiac.sh"), content=content)
         else:
             file_type = "system_files"
             vars = self.vars
+
         for host in self.host_stack():
             collection = host / file_type
             templates = jinja2.Environment(
@@ -219,7 +225,7 @@ class Files:
             for base, _, files in (collection).walk():
                 for f in files:
                     if f.endswith(".j2"):
-                        content = templates.get_template(str(base / f)).render(vars)
+                        content = templates.get_template(str(base / f)).render(**vars)
                     else:
                         with open(base / f, "r") as content:
                             content = content.read()
