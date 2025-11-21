@@ -314,7 +314,7 @@ class Config(Singleton):
     @property
     def infrastructure(self) -> str:
         infrastructure = self.get("infrastructure", default=None)
-        check_type("infrastructure key", infrastructure, (str, None))
+        check_type("infrastructure key", infrastructure, (str, type(None)))
         return infrastructure
 
     @property

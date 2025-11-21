@@ -92,7 +92,6 @@ class UserError(Exception):
 
 
 def check_type(item: str, value: Any, expected_type: Any) -> None:
-    print(expected_type)
     if not isinstance(value, expected_type):
         raise UserError(
             f"Expecting {expected_type} for {item}, found "
