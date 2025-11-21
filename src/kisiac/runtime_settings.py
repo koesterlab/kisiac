@@ -58,6 +58,10 @@ class SettingsBase(Singleton):
 
 @dataclass
 class GlobalSettings(SettingsBase):
+    skip_system_upgrade: bool = field(
+        default=False,
+        metadata={"help": "Skip system package upgrades"},
+    )
     non_interactive: bool = field(
         default=False, metadata={"help": "Run in non-interactive mode"}
     )

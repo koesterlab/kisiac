@@ -55,7 +55,8 @@ def update_host(host: str) -> None:
 
 def update_system_packages(host: str) -> None:
     run_cmd(["apt-get", "update"], sudo=True, host=host)
-    run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
+    if not GlobalSettings.get_instance().skip_system_upgrade:
+        run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
     run_cmd(["apt-get", "install"] + Config().system_software, sudo=True, host=host)
 
 

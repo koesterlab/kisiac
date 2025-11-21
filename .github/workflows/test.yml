@@ -50,8 +50,8 @@ jobs:
       - name: update-hosts first run
         shell: pixi run bash -e {0}
         run: |
-          kisiac --non-interactive update-hosts localhost
+          kisiac --non-interactive update-hosts --skip-system-package-upgrade localhost
       - name: update-hosts second run
         shell: pixi run bash -e {0}
         run: |
-          kisiac --non-interactive update-hosts localhost
+          kisiac --non-interactive update-hosts --skip-system-package-upgrade localhost
