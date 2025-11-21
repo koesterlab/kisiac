@@ -11,7 +11,7 @@ import yaml
 import git
 from pyfstab.entry import Entry as FstabEntry
 
-from kisiac.common import HostAgnosticPath, Singleton, cache, UserError, check_type, singleton
+from kisiac.common import HostAgnosticPath, Singleton, cache, UserError, check_type
 from kisiac.lvm import LVMSetup
 
 
