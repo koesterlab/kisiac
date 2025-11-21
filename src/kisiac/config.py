@@ -156,23 +156,28 @@ class Files:
 
     def infrastructure_stack(self) -> Iterable[Path]:
         base = self.repo_cache / "infrastructure"
-        yield base / "all"
+        all_path = base / "all"
+        if all_path.exists():
+            yield base / "all"
         if self.infrastructure is not None:
-            yield base / self.infrastructure
+            infra_path = base / self.infrastructure
+            if infra_path.exists():
+                yield infra_path
 
     def host_stack(self, include_infrastructure_root: bool = False) -> Iterable[Path]:
         hostname = platform.node()
         for infra in self.infrastructure_stack():
             base = infra / "hosts"
-            if include_infrastructure_root:
+            if include_infrastructure_root and infra.exists():
                 yield infra
-            for entry in base.iterdir():
-                if not entry.is_dir():
-                    raise UserError(f"{base} may only contain directories")
-                # yield if all or entry matches hostname
-                regex = str(entry).replace("*", r".+")
-                if entry == "all" or re.match(regex, hostname):
-                    yield base / entry
+            if base.exists():
+                for entry in base.iterdir():
+                    if not entry.is_dir():
+                        raise UserError(f"{base} may only contain directories")
+                    # yield if all or entry matches hostname
+                    regex = str(entry).replace("*", r".+")
+                    if entry == "all" or re.match(regex, hostname):
+                        yield base / entry
 
     def get_config(self) -> dict[str, Any]:
         config = {}
