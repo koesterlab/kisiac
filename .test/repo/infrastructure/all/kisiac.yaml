@@ -33,9 +33,6 @@ user_software:
       - altair
     desc: for running jupyter notebooks in the terminal (includes polars, pandas, altair)
 
-system_software:
-  - openssh
-
 messages:
   - >
     Do NOT use conda to manage software (it is available, but just for snakemake

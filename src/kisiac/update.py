@@ -15,6 +15,16 @@ from kisiac.lvm import LVMSetup
 import inquirer
 
 
+default_system_software = [
+    "openssh-server",
+    "openssh-client",
+    "lvm2",
+    "e2fsprogs",
+    "xfsprogs",
+    "btrfs-progs",
+]
+
+
 def setup_config() -> None:
     if GlobalSettings.get_instance().non_interactive:
         content = sys.stdin.read()
@@ -58,7 +68,8 @@ def update_system_packages(host: str) -> None:
     if not UpdateHostSettings.get_instance().skip_system_upgrade:
         run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
     run_cmd(
-        ["apt-get", "install"] + Config.get_instance().system_software,
+        ["apt-get", "install"]
+        + list(set(Config.get_instance().system_software + default_system_software)),
         sudo=True,
         host=host,
     )
