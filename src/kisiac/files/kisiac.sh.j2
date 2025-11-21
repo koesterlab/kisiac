@@ -17,7 +17,7 @@ setup_cmd pixi "curl -fsSL https://pixi.sh/install.sh | sh"
 setup_cmd pkg.cmd pkg.install_cmd
 {% endfor %}
 
-{% set head_lines = "=" * len(infrastructure_name) %}
+{% set head_lines = "=" * (infrastructure_name|len) %}
 
 if [ "$relogin" = true ] ; then
   echo "Please relogin to apply changes."
