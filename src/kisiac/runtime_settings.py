@@ -58,10 +58,6 @@ class SettingsBase(Singleton):
 
 @dataclass
 class GlobalSettings(SettingsBase):
-    skip_system_upgrade: bool = field(
-        default=False,
-        metadata={"help": "Skip system package upgrades"},
-    )
     non_interactive: bool = field(
         default=False, metadata={"help": "Run in non-interactive mode"}
     )
@@ -69,6 +65,10 @@ class GlobalSettings(SettingsBase):
 
 @dataclass
 class UpdateHostSettings(SettingsBase):
+    skip_system_upgrade: bool = field(
+        default=False,
+        metadata={"help": "Skip system package upgrades"},
+    )
     hosts: list[str] = field(
         default_factory=lambda: ["localhost"],
         metadata={

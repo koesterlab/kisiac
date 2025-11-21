@@ -7,7 +7,7 @@ from kisiac.common import (
     run_cmd,
 )
 from kisiac.filesystems import update_filesystems
-from kisiac.runtime_settings import GlobalSettings
+from kisiac.runtime_settings import GlobalSettings, UpdateHostSettings
 from kisiac import users
 from kisiac.config import Config
 from kisiac.lvm import LVMSetup
@@ -55,7 +55,7 @@ def update_host(host: str) -> None:
 
 def update_system_packages(host: str) -> None:
     run_cmd(["apt-get", "update"], sudo=True, host=host)
-    if not GlobalSettings.get_instance().skip_system_upgrade:
+    if not UpdateHostSettings.get_instance().skip_system_upgrade:
         run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
     run_cmd(
         ["apt-get", "install"] + Config.get_instance().system_software,
