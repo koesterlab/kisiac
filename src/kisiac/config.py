@@ -144,10 +144,9 @@ class Files:
         self.infrastructure = config.infrastructure
         self.vars = config.vars
         self.user_vars = config.user_vars
-        print(list(cache.iterdir()))
+        print(cache.exists(), self.repo_cache.exists())
         if not self.repo_cache.exists():
             self.repo_cache.parent.mkdir(parents=True, exist_ok=True)
-            self.repo_cache.parent.mkdir(exist_ok=True)
             self.repo = git.Repo.clone_from(config.repo, self.repo_cache)
         else:
             self.repo = git.Repo(self.repo_cache)
