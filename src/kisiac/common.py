@@ -215,7 +215,7 @@ class HostAgnosticPath:
 
     @property
     def parents(self) -> Sequence[Self]:
-        return [type(self)(parent, host=self.host) for parent in self.path.parents]
+        return [type(self)(parent, host=self.host, sudo=self.sudo) for parent in self.path.parents]
 
     def __truediv__(self, other: Any) -> Self:
         return type(self)(self.path / other, host=self.host, sudo=self.sudo)
