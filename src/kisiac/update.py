@@ -16,7 +16,7 @@ import inquirer
 
 
 def setup_config() -> None:
-    if GlobalSettings().non_interactive:
+    if GlobalSettings.get_instance().non_interactive:
         content = sys.stdin.read()
     else:
         answers = inquirer.prompt(

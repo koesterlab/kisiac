@@ -14,29 +14,22 @@ cache = Path("~/.cache/kisiac").expanduser()
 
 
 class Singleton:
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._instance = None         # each subclass gets its own instance
-        cls._initialized = False     # and its own init flag
-
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, *args, **kwargs):
-        if self._initialized:
-            return  # skip repeated initialization
-        # one-time initialization logic goes here
-        super().__init__(*args, **kwargs)
-        self._initialized = True
+    @classmethod
+    def get_instance(cls) -> Self:
+        assert cls._instance is not None
+        return cls._instance
 
 
 
 def confirm_action(desc: str) -> bool:
     from kisiac.runtime_settings import GlobalSettings
 
-    if GlobalSettings().non_interactive:
+    if GlobalSettings.get_instance().non_interactive:
         return True
 
     response = inquirer.prompt(
