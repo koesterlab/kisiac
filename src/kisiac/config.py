@@ -199,7 +199,7 @@ class Files:
                 autoescape=jinja2.select_autoescape(),
             )
             content = templates.get_template("kisiac.sh.j2").render(
-                packages=Config().user_software
+                packages=Config.get_instance().user_software
             )
             yield File(target_path=Path("/etc/profile.d/kisiac.sh"), content=content)
         else:

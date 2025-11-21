@@ -33,7 +33,7 @@ def setup_config() -> None:
 
 
 def update_host(host: str) -> None:
-    config = Config()
+    config = Config.get_instance()
     for file in config.files.get_files(user=None):
         file.write(overwrite_existing=True, host=host, sudo=True)
 
@@ -57,11 +57,11 @@ def update_system_packages(host: str) -> None:
     run_cmd(["apt-get", "update"], sudo=True, host=host)
     if not GlobalSettings.get_instance().skip_system_upgrade:
         run_cmd(["apt-get", "upgrade"], sudo=True, host=host)
-    run_cmd(["apt-get", "install"] + Config().system_software, sudo=True, host=host)
+    run_cmd(["apt-get", "install"] + Config.get_instance().system_software, sudo=True, host=host)
 
 
 def update_lvm(host: str) -> None:
-    desired = Config().lvm
+    desired = Config.get_instance().lvm
     current = LVMSetup.from_system(host=host)
 
     cmds = []

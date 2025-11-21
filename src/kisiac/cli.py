@@ -1,6 +1,7 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
 from kisiac.common import UserError
+from kisiac.config import Config
 from kisiac.runtime_settings import (
     GlobalSettings,
     UpdateHostSettings,
@@ -28,6 +29,7 @@ def main() -> None:
         parser = get_argument_parser()
         args = parser.parse_args()
         GlobalSettings.from_cli_args(args)
+        Config()
         match args.subcommand:
             case "update-hosts":
                 UpdateHostSettings.from_cli_args(args)

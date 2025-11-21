@@ -10,7 +10,7 @@ blkid_attrs_re = re.compile(r'(?P<attr>[A-Z]+)="(?P<value>\S+)"')
 
 
 def update_filesystems(host: str) -> None:
-    filesystems = set(Config().filesystems)
+    filesystems = set(Config.get_instance().filesystems)
     device_infos = DeviceInfos(host)
 
     # First, create filesystems that do not exist yet or need to be changed.
@@ -61,7 +61,7 @@ def update_permissions(host: str) -> None:
         else:
             assert False, "unreachable"
 
-    permissions = Config().permissions
+    permissions = Config.get_instance().permissions
     for path, permissions in permissions.items():
         path = HostAgnosticPath(path, host=host, sudo=True)
         chmod_args = []
