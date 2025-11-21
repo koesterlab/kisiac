@@ -81,7 +81,7 @@ def update_lvm(host: str) -> None:
 
     cmds = []
 
-    cmds.append(
+    cmds.extend(
         [
             "lvremove",
             "--yes",
@@ -91,18 +91,18 @@ def update_lvm(host: str) -> None:
         for lv in vg.lvs.values()
         if vg.name not in desired.vgs or lv.name not in desired.vgs[vg.name].lvs
     )
-    cmds.append(
+    cmds.extend(
         ["vgremove", "--yes", vg] for vg in current.vgs.keys() - desired.vgs.keys()
     )
     cmds.append(["pvremove", "--yes"] + list(current.pvs - desired.pvs))
 
     cmds.append(["pvcreate", "--yes"] + list(desired.pvs - current.pvs))
-    cmds.append(
+    cmds.extend(
         ["vgcreate", vg.name] + [pv.device for pv in vg.pvs]
         for vg_name, vg in desired.vgs.items()
         if vg_name not in current.vgs
     )
-    cmds.append(
+    cmds.extend(
         [
             "lvcreate",
             "-n",
@@ -166,11 +166,10 @@ def update_lvm(host: str) -> None:
         "\nProceed? If answering no, consider making the changes manually or "
         "adjust the kisiac LVM configuration."
     ):
-        for cmd_list in cmds:
-            for cmd in cmd_list:
-                try:
-                    run_cmd(cmd, host=host, sudo=True, user_error=False)
-                except sp.CalledProcessError as e:
-                    raise UserError(
-                        f"Incomplete LVM update due to error (make sure to manually fix this!): {e.stderr}"
-                    )
+        for cmd in cmds:
+            try:
+                run_cmd(cmd, host=host, sudo=True, user_error=False)
+            except sp.CalledProcessError as e:
+                raise UserError(
+                    f"Incomplete LVM update due to error (make sure to manually fix this!): {e.stderr}"
+                )
