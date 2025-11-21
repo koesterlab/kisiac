@@ -37,7 +37,7 @@ def setup_users(host: str) -> None:
         sshdir = HostAgnosticPath(f"~{user.username}/.ssh", host=host, sudo=True)
         sshdir.mkdir()
         sshdir.chown(user.username, user.usergroup)
-        sshdir.chmod("u=rwx", "go-rwx")
+        sshdir.chmod("u=rwx", "g-rwx", "o-rwx")
         auth_keys_file = sshdir / "authorized_keys"
         auth_keys_file.write_text(user.ssh_pub_key + "\n")
         user.fix_permissions([auth_keys_file.path], host=host)
