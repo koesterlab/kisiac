@@ -11,7 +11,14 @@ import yaml
 import git
 from pyfstab.entry import Entry as FstabEntry
 
-from kisiac.common import HostAgnosticPath, Singleton, cache, UserError, check_type
+from kisiac.common import (
+    HostAgnosticPath,
+    Singleton,
+    cache,
+    UserError,
+    check_type,
+    handle_key_error,
+)
 from kisiac.lvm import LVMSetup
 
 
@@ -233,15 +240,10 @@ class Files:
 @dataclass
 class User:
     username: str
-    groups: list[str]
+    primary_group: str
+    secondary_groups: list[str]
     ssh_pub_key: str
     vars: dict[str, Any]
-
-    def __post_init__(self) -> None:
-        # Ensure that groups are unique and that the username group is added
-        groups = set(self.groups)
-        groups.add(self.username)
-        self.groups = sorted(groups)
 
     @property
     def usergroup(self) -> str:
@@ -311,19 +313,22 @@ class Config(Singleton):
         return value
 
     @property
+    @handle_key_error("Invalid user configuration")
     def users(self) -> Iterable[User]:
         users = self.get("users")
         check_type("users key", users, dict)
 
         for username, settings in users.items():
             check_type(f"user {username}", settings, dict)
-            groups = settings.get("groups", [])
-            check_type(f"user {username} groups", groups, list)
+            primary_group = settings["groups"]["primary"]
+            secondary_groups = settings["groups"].get("secondary", [])
+            check_type(f"user {username} groups", secondary_groups, list)
             yield User(
                 username,
                 ssh_pub_key=settings["ssh_pub_key"],
                 vars=settings.get("vars", {}),
-                groups=list(map(str, groups)),
+                primary_group=primary_group,
+                secondary_groups=list(map(str, secondary_groups)),
             )
 
     @property

@@ -12,6 +12,19 @@ import inquirer
 cache = Path("~/.cache/kisiac").expanduser()
 
 
+def handle_key_error(msg: str) -> Callable:
+    def decoator(func: Callable) -> Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            try:
+                return func(*args, **kwargs)
+            except KeyError as e:
+                raise UserError(f"{msg}: {e}") from e
+
+        return wrapper
+
+    return decoator
+
+
 class Singleton:
     @classmethod
     def get_instance(cls, *args, **kwargs) -> Self:

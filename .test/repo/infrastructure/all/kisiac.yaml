@@ -1,6 +1,11 @@
 users:
   jkoester:
     ssh_pub_key: ssh-rsa AAAdummy
+    primary_group: koesterlab
+    groups:
+      primary: koesterlab
+      secondary:
+        - researchers
     vars:
       soemthing: foo
 

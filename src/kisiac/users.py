@@ -8,7 +8,9 @@ from kisiac.config import Config
 def setup_users(host: str) -> None:
     users = list(Config.get_instance().users)
 
-    groups = {group for user in users for group in user.groups}
+    groups = {group for user in users for group in user.secondary_groups} | {
+        user.primary_group for user in users
+    }
 
     for group in groups:
         # create group if it does not exist
@@ -25,11 +27,16 @@ def setup_users(host: str) -> None:
         # create user if it does not exist
         if not is_existing_user(user.username):
             print(f"Creating user: {user.username}")
+            group_arg = []
+            if user.secondary_groups:
+                group_arg = ["-G", ",".join(user.secondary_groups)]
+
             run_cmd(
                 [
                     "useradd",
-                    "--groups",
-                    *user.groups,
+                    "-g",
+                    user.primary_group,
+                    *group_arg,
                     "--shell",
                     "/bin/bash",
                     "-m",
