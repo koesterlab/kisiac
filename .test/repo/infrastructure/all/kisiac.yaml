@@ -54,6 +54,18 @@ messages:
     Do NOT use conda to manage software (it is available, but just for snakemake
     internal use).
 
+lvm:
+  pvs:
+    - /dev/loop0
+  vgs:
+    test-vg:
+      pvs:
+        - /dev/loop0
+      lvs:
+        test-lv:
+          size: 100M
+          layout: linear
+
 permissions:
   /tmp/test:
     user: jkoester
