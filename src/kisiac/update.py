@@ -94,11 +94,11 @@ def update_lvm(host: str) -> None:
     cmds.extend(
         ["vgremove", "--yes", vg] for vg in current.vgs.keys() - desired.vgs.keys()
     )
-    pvremove = list(current.pvs - desired.pvs)
+    pvremove = [pv.device for pv in current.pvs - desired.pvs]
     if pvremove:
         cmds.append(["pvremove", "--yes", *pvremove])
 
-    pvcreate = list(desired.pvs - current.pvs)
+    pvcreate = [pv.device for pv in desired.pvs - current.pvs]
     if pvcreate:
         cmds.append(["pvcreate", "--yes", *pvcreate])
     cmds.extend(
