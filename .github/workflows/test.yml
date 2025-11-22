@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: setup test repo
+      - name: setup test data
         run: |
           cd .test/repo
           git init .
@@ -29,6 +29,8 @@ jobs:
           git add *
           git commit -m "Initial commit"
           cd ../..
+          mkdir /tmp/test
+          touch /tmp/test/exec
       - uses: prefix-dev/setup-pixi@v0
       - name: setup kisiac config
         shell: pixi run bash -e {0}

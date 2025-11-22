@@ -152,8 +152,8 @@ class HostAgnosticPath:
         else:
             self._run_cmd(["mkdir", "-p", str(self.path)])
 
-    def chmod(self, *mode: str) -> None:
-        self._chperm("chmod", ",".join(mode))
+    def chmod(self, *mode: str, recursive: bool = True) -> None:
+        self._chperm("chmod", ",".join(mode), recursive=recursive)
 
     def chown(self, user: str | None, group: str | None = None) -> None:
         if user is not None:
@@ -164,11 +164,11 @@ class HostAgnosticPath:
         else:
             raise ValueError("Either user or group must be provided.")
 
-    def _chperm(self, cmd: str, arg: str) -> None:
+    def _chperm(self, cmd: str, arg: str, recursive: bool = True) -> None:
         args = [arg]
-        if self.is_dir():
-            args = ["-R"] + args
-        self._run_cmd([cmd] + args + [str(self.path)])
+        if recursive and self.is_dir():
+            args = ["-R", *args]
+        self._run_cmd([cmd, *args, str(self.path)])
 
     def is_local_and_user(self) -> bool:
         return self.host == "localhost" and not self.sudo

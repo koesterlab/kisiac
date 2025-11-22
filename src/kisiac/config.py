@@ -159,7 +159,6 @@ class Files:
                 # update to latest commit
                 self.repo.remotes.origin.pull()
 
-
     def infrastructure_stack(self) -> Iterable[Path]:
         base = self.repo_cache / "infrastructure"
         all_path = base / "all"
@@ -207,9 +206,7 @@ class Files:
             content = templates.get_template("kisiac.sh.j2").render(
                 packages=Config.get_instance().user_software,
                 infrastructure_name=Config.get_instance().infrastructure_name,
-                infrastructure_name_len=len(
-                    Config.get_instance().infrastructure_name
-                ),
+                infrastructure_name_len=len(Config.get_instance().infrastructure_name),
                 messages=Config.get_instance().messages,
             )
             yield File(target_path=Path("/etc/profile.d/kisiac.sh"), content=content)
@@ -236,6 +233,7 @@ class Files:
 @dataclass
 class User:
     username: str
+    groups: list[str]
     ssh_pub_key: str
     vars: dict[str, Any]
 
@@ -313,10 +311,13 @@ class Config(Singleton):
 
         for username, settings in users.items():
             check_type(f"user {username}", settings, dict)
+            groups = settings.get("groups", [])
+            check_type(f"user {username} groups", groups, list)
             yield User(
                 username,
                 ssh_pub_key=settings["ssh_pub_key"],
                 vars=settings.get("vars", {}),
+                groups=list(map(str, groups)),
             )
 
     @property

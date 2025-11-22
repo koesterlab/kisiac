@@ -22,9 +22,10 @@ kisiac = { path = ".", editable = true }
 [tool.pixi.feature.dev.tasks]
 format = "ruff format src"
 check = "ruff check src"
+test = "pytest tests/test_all.py -v"
 
 [dependency-groups]
-dev = ["ruff"]
+dev = ["ruff", "pytest"]
 
 [tool.pixi.environments]
 dev = ["dev"]

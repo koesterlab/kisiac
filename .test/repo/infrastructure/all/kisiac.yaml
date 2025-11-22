@@ -48,3 +48,19 @@ messages:
   - >
     Do NOT use conda to manage software (it is available, but just for snakemake
     internal use).
+
+permissions:
+  /tmp/test:
+    user: jkoester
+    group: koesterlab
+    setgid: true
+    sticky: true
+    setuid: true
+    read: user
+    write: user
+  /tmp/test/exec:
+    user: jkoester
+    group: koesterlab
+    execute: user
+    read: user
+    write: user

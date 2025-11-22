@@ -6,13 +6,20 @@ from kisiac.config import Config
 
 
 def setup_users(host: str) -> None:
-    # create group if it does not exist
-    if (
-        run_cmd(["getent", "group", "koesterlab"], check=False, host=host).returncode
-        == 2
-    ):
-        print("Creating group: koesterlab")
-        run_cmd(["groupadd", "koesterlab"], host=host, sudo=True)
+    users = list(Config.get_instance().users)
+
+    groups = {group for user in users for group in user.groups}
+
+    for group in groups:
+        # create group if it does not exist
+        if (
+            run_cmd(
+                ["getent", "group", "koesterlab"], check=False, host=host
+            ).returncode
+            == 2
+        ):
+            print(f"Creating group: {group}")
+            run_cmd(["groupadd", group], host=host, sudo=True)
 
     for user in Config.get_instance().users:
         # create user if it does not exist
@@ -22,7 +29,7 @@ def setup_users(host: str) -> None:
                 [
                     "useradd",
                     "--groups",
-                    "koesterlab",
+                    *user.groups,
                     "--shell",
                     "/bin/bash",
                     "-m",

@@ -73,9 +73,18 @@ def update_permissions(host: str) -> None:
             chmod_args.append("+t")
         chmod_args.extend(apply_user_set(permissions.read, "r"))
         chmod_args.extend(apply_user_set(permissions.write, "w"))
-        chmod_args.extend(apply_user_set(permissions.execute, "x"))
         if chmod_args:
             path.chmod(*chmod_args)
+
+        # execute permissions are handled differently for dir and files
+        if path.is_dir():
+            if permissions.read is not None:
+                # With dirs, read should be considered equivalent to execute, and handled
+                # non-recursively. In turn, we ignore the execute setting for dirs because
+                # it becomes redundant.
+                path.chmod(*apply_user_set(permissions.read, "x"), recursive=False)
+        elif permissions.execute is not None:
+            path.chmod(*apply_user_set(permissions.execute, "x"))
         path.chown(permissions.owner, permissions.group)
 
 
