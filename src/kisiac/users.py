@@ -11,13 +11,12 @@ def setup_users(host: str) -> None:
     groups = {group for user in users for group in user.secondary_groups} | {
         user.primary_group for user in users
     }
-    print(groups)
 
     for group in groups:
         # create group if it does not exist
         if (
             run_cmd(
-                ["getent", "group", "koesterlab"], check=False, host=host
+                ["getent", "group", group], check=False, host=host
             ).returncode
             == 2
         ):
