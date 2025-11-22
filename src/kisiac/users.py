@@ -11,6 +11,7 @@ def setup_users(host: str) -> None:
     groups = {group for user in users for group in user.secondary_groups} | {
         user.primary_group for user in users
     }
+    print(groups)
 
     for group in groups:
         # create group if it does not exist
