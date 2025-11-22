@@ -63,7 +63,7 @@ lvm:
         - /dev/loop0
       lvs:
         test-lv:
-          size: 100M
+          size: 50M
           layout: linear
 
 permissions:
