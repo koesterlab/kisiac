@@ -237,6 +237,12 @@ class User:
     ssh_pub_key: str
     vars: dict[str, Any]
 
+    def __post_init__(self) -> None:
+        # Ensure that groups are unique and that the username group is added
+        groups = set(self.groups)
+        groups.add(self.username)
+        self.groups = sorted(groups)
+
     @property
     def usergroup(self) -> str:
         return self.username
