@@ -245,10 +245,6 @@ class User:
     ssh_pub_key: str
     vars: dict[str, Any]
 
-    @property
-    def usergroup(self) -> str:
-        return self.username
-
     def fix_permissions(self, paths: Iterable[Path], host: str) -> None:
         for path in paths:
             path = HostAgnosticPath(path, host=host, sudo=True)
@@ -257,7 +253,7 @@ class User:
                 path.chmod("u=rwx", "g-rwx", "o-rwx")
             else:
                 path.chmod("u=rw", "g-rwx", "o-rwx")
-            path.chown(self.username, self.usergroup)
+            path.chown(self.username, self.primary_group)
 
 
 class Config(Singleton):
