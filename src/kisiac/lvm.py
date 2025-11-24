@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 import json
+from pathlib import Path
 from typing import Any, Self
 
 from humanfriendly import parse_size
@@ -18,12 +19,14 @@ class LV:
     layout: str
     size: int
 
-
 @dataclass(frozen=True)
 class VG:
     name: str
     pvs: set[PV] = field(default_factory=set)
     lvs: dict[str, LV] = field(default_factory=dict)
+
+    def get_lv_device(self, lv_name: str) -> Path:
+        return Path("/dev") / self.name / lv_name
 
 
 @dataclass

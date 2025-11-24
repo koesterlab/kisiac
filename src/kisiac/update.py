@@ -7,7 +7,7 @@ from kisiac.common import (
     confirm_action,
     run_cmd,
 )
-from kisiac.filesystems import update_filesystems
+from kisiac.filesystems import DeviceInfos, update_filesystems
 from kisiac.runtime_settings import GlobalSettings, UpdateHostSettings
 from kisiac import users
 from kisiac.config import Config
@@ -79,6 +79,7 @@ def update_system_packages(host: str) -> None:
 def update_lvm(host: str) -> None:
     desired = Config.get_instance().lvm
     current = LVMSetup.from_system(host=host)
+    device_infos = DeviceInfos(host)
 
     cmds = []
 
@@ -158,10 +159,14 @@ def update_lvm(host: str) -> None:
                     f"Resizing LV {lv_desired.name} from {lv_current.size} to "
                     f"{lv_desired.size}"
                 )
+
+                device_info = device_infos.get_info_for_device(vg_desired.get_lv_device(lv_desired.name))
+                assert device_info is not None
+
                 cmds.append(
                     [
                         "lvresize",
-                        "--resizefs",
+                        *(["--resizefs"] if device_info.fstype is not None else []),
                         "-L",
                         f"{lv_desired.size}b",
                         f"{vg_desired.name}/{lv_desired.name}",

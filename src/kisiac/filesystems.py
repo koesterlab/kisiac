@@ -129,3 +129,9 @@ class DeviceInfos:
         for info in self.infos:
             if info.is_targeted_by_filesystem(filesystem):
                 return info
+
+    def get_info_for_device(self, device: Path) -> DeviceInfo | None:
+        for info in self.infos:
+            if info.device == device:
+                return info
+        return None
