@@ -163,12 +163,16 @@ def update_lvm(host: str) -> None:
                 device_info = device_infos.get_info_for_device(
                     vg_desired.get_lv_device(lv_desired.name)
                 )
-                assert device_info is not None
+                resize_fs = (
+                    ["--resizefs"]
+                    if device_info is not None and device_info.fstype is not None
+                    else []
+                )
 
                 cmds.append(
                     [
                         "lvresize",
-                        *(["--resizefs"] if device_info.fstype is not None else []),
+                        *resize_fs,
                         "-L",
                         f"{lv_desired.size}b",
                         f"{vg_desired.name}/{lv_desired.name}",
