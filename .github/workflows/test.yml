@@ -47,8 +47,7 @@ jobs:
           head -c 10000000 /dev/zero > /tmp/zeroes
           # Use it as a block device
           sudo losetup /dev/loop0 /tmp/zeroes
-          # Remove the device
-          sudo losetup -d /dev/loop0
+          sudo blockdev --getsize64 /dev/loop0
       - name: update-hosts first run
         shell: pixi run bash -e {0}
         run: |
