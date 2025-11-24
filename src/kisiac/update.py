@@ -162,7 +162,7 @@ def update_lvm(host: str) -> None:
                 log_action(
                     host,
                     f"Resizing LV {lv_desired.name} from {lv_current.size} to "
-                    f"{lv_desired.size}"
+                    f"{lv_desired.size}",
                 )
 
                 device_info = device_infos.get_info_for_device(
