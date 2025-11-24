@@ -69,7 +69,7 @@ lvm:
 filesystems:
   - device: /dev/test-vg/test-lv
     type: ext4
-    mountpoint: /mnt/test-lv
+    mount: /mnt/test-lv
     options: defaults
 
 permissions:
