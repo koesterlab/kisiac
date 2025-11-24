@@ -235,9 +235,10 @@ class Files:
                     if f.endswith(".j2"):
                         content = templates.get_template(str(base / f)).render(**vars)
                     elif f.endswith(".yaml"):
-                        content = yte.process_yaml(
-                            base / f, variables=vars, require_use_yte=True
-                        )
+                        with open(base / f, "r") as fileobj:
+                            content = yte.process_yaml(
+                                fileobj, variables=vars, require_use_yte=True
+                            )
                         # no outfile, hence yte returns string
                         assert isinstance(content, str)
                     else:
