@@ -160,6 +160,7 @@ def update_lvm(host: str) -> None:
                 cmds.append(
                     [
                         "lvresize",
+                        "--resizefs",
                         "-L",
                         lv_desired.size,
                         f"{vg_desired.name}/{lv_desired.name}",
