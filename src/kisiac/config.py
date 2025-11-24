@@ -397,7 +397,7 @@ class Config(Singleton):
     @property
     def filesystems(self) -> Iterable[Filesystem]:
         filesystems = self.get("filesystems", default={})
-        check_type("filesystems key", filesystems, dict)
+        check_type("filesystems key", filesystems, list)
         for settings in filesystems:
             check_type("filesystem item", settings, dict)
             yield Filesystem(
