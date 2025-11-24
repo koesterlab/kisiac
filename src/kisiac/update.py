@@ -167,7 +167,7 @@ def update_lvm(host: str) -> None:
                         f"{vg_desired.name}/{lv_desired.name}",
                     ]
                 )
-    cmd_msg = "\n".join(cmd_to_str(cmd) for cmd in cmds)
+    cmd_msg = cmd_to_str(*cmds)
 
     if confirm_action(
         f"The following LVM commands will be executed:\n{cmd_msg}\n"

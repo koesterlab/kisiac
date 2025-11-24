@@ -54,8 +54,8 @@ def exists_cmd(cmd: str, host: str, sudo: bool) -> bool:
         return False
 
 
-def cmd_to_str(cmd: list[str]) -> str:
-    return " ".join(map(str, cmd))
+def cmd_to_str(*cmds: list[str]) -> str:
+    return "\n".join(" ".join(map(str, cmd)) for cmd in cmds)
 
 
 def run_cmd(
