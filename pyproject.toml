@@ -29,7 +29,7 @@ check-build = { cmd = "python -m twine check dist/*", depends-on = [
 ], description = "Check that the package can be uploaded" }
 
 [dependency-groups]
-dev = ["ruff", "pytest", "twine", "python-build"]
+dev = ["ruff", "pytest", "twine", "build"]
 
 [tool.pixi.environments]
 dev = ["dev"]
