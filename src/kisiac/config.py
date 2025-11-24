@@ -189,6 +189,7 @@ class Files:
                     # yield if all or entry matches hostname
                     regex = str(entry).replace("*", r".+")
                     if entry == "all" or re.match(regex, hostname):
+                        print(base / entry)
                         yield base / entry
 
     def get_config(self) -> dict[str, Any]:
