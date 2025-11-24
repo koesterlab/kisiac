@@ -34,7 +34,7 @@ jobs:
 
       - name: Build source and wheel distribution + check build
         run: |
-          pixi run check-build
+          pixi run -e dev check-build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
