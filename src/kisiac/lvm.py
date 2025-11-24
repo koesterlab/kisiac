@@ -71,7 +71,13 @@ class LVMSetup:
 
         lv_data = json.loads(
             run_cmd(
-                ["lvs", "--options", "lv_name,vg_name,lv_layout,lv_size", "--reportformat", "json"],
+                [
+                    "lvs",
+                    "--options",
+                    "lv_name,vg_name,lv_layout,lv_size",
+                    "--reportformat",
+                    "json",
+                ],
                 host=host,
                 sudo=True,
             ).stdout
