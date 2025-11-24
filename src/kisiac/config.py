@@ -138,8 +138,11 @@ class File:
 
     def write(self, overwrite_existing: bool, host: str, sudo: bool) -> Sequence[Path]:
         target_path = HostAgnosticPath(self.target_path, host=host, sudo=sudo)
-        if target_path.exists() and not overwrite_existing:
-            target_path = target_path.with_suffix(".updated")
+        if target_path.exists():
+            if target_path.read_text() == self.content:
+                return []
+            if not overwrite_existing:
+                target_path = target_path.with_suffix(".updated")
         created = []
         for ancestor in target_path.parents[::-1][1:]:
             if not ancestor.exists():
@@ -188,7 +191,7 @@ class Files:
                         raise UserError(f"{base} may only contain directories")
                     # yield if all or entry matches hostname
                     regex = str(entry).replace("*", r".+")
-                    if entry == "all" or re.match(regex, hostname):
+                    if entry.name == "all" or re.match(regex, hostname):
                         yield entry
 
     def get_config(self) -> dict[str, Any]:
@@ -223,13 +226,11 @@ class Files:
 
         for host in self.host_stack():
             collection = host / file_type
-            print(collection)
             templates = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(host),
                 autoescape=jinja2.select_autoescape(),
             )
             for base, _, files in (collection).walk():
-                print(files)
                 for f in files:
                     if f.endswith(".j2"):
                         content = templates.get_template(str(base / f)).render(**vars)
