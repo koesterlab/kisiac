@@ -137,7 +137,10 @@ class DeviceInfos:
             if device.is_relative_to(Path("/dev/mapper")):
                 # also add /dev/vgname/lvname path for LVM logical volumes
                 device = Path("/dev") / re.sub(
-                    r"[^-]-[^-]", "/", device.name, count=1
+                    r"(?P<pre>[^-])-(?P<post>[^-])",
+                    r"\g<pre>/\g<post>",
+                    device.name,
+                    count=1,
                 ).replace("--", "-")
                 self.infos.append(device_info.with_device(Path(device)))
 
