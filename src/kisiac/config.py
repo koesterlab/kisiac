@@ -223,11 +223,13 @@ class Files:
 
         for host in self.host_stack():
             collection = host / file_type
+            print(collection)
             templates = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(host),
                 autoescape=jinja2.select_autoescape(),
             )
             for base, _, files in (collection).walk():
+                print(files)
                 for f in files:
                     if f.endswith(".j2"):
                         content = templates.get_template(str(base / f)).render(**vars)
