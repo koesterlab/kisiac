@@ -112,7 +112,7 @@ class DeviceInfos:
     def __init__(self, host: str) -> None:
         lsblk_output = json.loads(
             run_cmd(
-                ["lsblk", "--json", "--fs"],
+                ["lsblk", "--json", "--path", "--fs"],
                 sudo=True,
                 host=host,
             ).stdout
@@ -133,7 +133,6 @@ class DeviceInfos:
 
         for entry in lsblk_output["blockdevices"]:
             parse_entry(entry)
-        print(self.infos)
 
     def get_info(self, filesystem: Filesystem) -> DeviceInfo:
         for info in self.infos:
