@@ -400,8 +400,9 @@ class Config(Singleton):
         check_type("filesystems key", filesystems, list)
         for settings in filesystems:
             check_type("filesystem item", settings, dict)
+            device = settings.get("device")
             yield Filesystem(
-                device=settings.get("device"),
+                device=Path(device) if device is not None else None,
                 label=settings.get("label"),
                 uuid=settings.get("uuid"),
                 fstype=settings["type"],
