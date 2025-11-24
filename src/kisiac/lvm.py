@@ -69,35 +69,42 @@ class LVMSetup:
 
         entities: Self = cls()
 
-        # load LVM info from report
-        data = json.loads(
+        lv_data = json.loads(
             run_cmd(
-                [
-                    "lvm",
-                    "fullreport",
-                    "--options",
-                    "pv_name,vg_name",
-                    "--reportformat",
-                    "json",
-                ],
+                ["lvs", "--options", "lv_name,vg_name,lv_layout,lv_size", "--reportformat", "json"],
                 host=host,
                 sudo=True,
             ).stdout
-        )["report"]
-        print(json.dumps(data, indent=2))  # DEBUG
-        for entry in data:
-            for vg in entry["vg"]:
-                entities.vgs[vg["vg_name"]] = VG(name=vg["vg_name"])
-            for pv in entry["pv"]:
-                pv_obj = PV(device=pv["pv_name"])
-                entities.pvs.add(pv_obj)
-                entities.vgs[pv["vg_name"]].pvs.add(pv_obj)
+        )["report"][0]["lv"]
 
-            for lv in entry["lv"]:
-                vg = entities.vgs[lv["vg_name"]]
-                vg.lvs[lv["lv_name"]] = LV(
-                    name=lv["lv_name"],
-                    layout=lv["lv_layout"],
-                    size=lv["lv_size"],
-                )
+        vg_data = json.loads(
+            run_cmd(
+                ["vgs", "--options", "vg_name", "--reportformat", "json"],
+                host=host,
+                sudo=True,
+            ).stdout
+        )["report"][0]["vg"]
+
+        pv_data = json.loads(
+            run_cmd(
+                ["pvs", "--options", "pv_name,vg_name", "--reportformat", "json"],
+                host=host,
+                sudo=True,
+            ).stdout
+        )["report"][0]["pv"]
+
+        for entry in vg_data:
+            entities.vgs[entry["vg_name"]] = VG(name=entry["vg_name"])
+        for entry in pv_data:
+            pv_obj = PV(device=entry["pv_name"])
+            entities.pvs.add(pv_obj)
+            entities.vgs[entry["vg_name"]].pvs.add(pv_obj)
+
+        for entry in lv_data:
+            vg = entities.vgs[entry["vg_name"]]
+            vg.lvs[entry["lv_name"]] = LV(
+                name=entry["lv_name"],
+                layout=entry["lv_layout"],
+                size=entry["lv_size"],
+            )
         return entities
