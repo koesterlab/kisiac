@@ -53,7 +53,7 @@ class LVMSetup:
                 lvs_entities[lv_name] = LV(
                     name=lv_name,
                     layout=lv_settings["layout"],
-                    size=parse_size(lv_settings["size"]),
+                    size=parse_size(lv_settings["size"], binary=True),
                 )
 
             entities.vgs[name] = VG(
@@ -115,6 +115,6 @@ class LVMSetup:
             vg.lvs[entry["lv_name"]] = LV(
                 name=entry["lv_name"],
                 layout=entry["lv_layout"],
-                size=parse_size(entry["lv_size"]),
+                size=parse_size(entry["lv_size"], binary=True),
             )
         return entities
