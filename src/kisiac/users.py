@@ -14,12 +14,7 @@ def setup_users(host: str) -> None:
 
     for group in groups:
         # create group if it does not exist
-        if (
-            run_cmd(
-                ["getent", "group", group], check=False, host=host
-            ).returncode
-            == 2
-        ):
+        if run_cmd(["getent", "group", group], check=False, host=host).returncode == 2:
             print(f"Creating group: {group}")
             run_cmd(["groupadd", group], host=host, sudo=True)
 
