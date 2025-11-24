@@ -120,16 +120,14 @@ class DeviceInfos:
         self.infos: list[DeviceInfo] = []
 
         def parse_entry(entry: dict[str, Any]) -> None:
-            uuid = entry["uuid"]
-            if uuid:
-                self.infos.append(
-                    DeviceInfo(
-                        device=Path("/dev") / entry["name"],
-                        fstype=entry["fstype"],
-                        label=entry["label"],
-                        uuid=entry["uuid"],
-                    )
+            self.infos.append(
+                DeviceInfo(
+                    device=Path("/dev") / entry["name"],
+                    fstype=entry["fstype"],
+                    label=entry["label"],
+                    uuid=entry["uuid"],
                 )
+            )
             for child in entry.get("children", []):
                 parse_entry(child)
 
