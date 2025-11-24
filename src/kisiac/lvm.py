@@ -77,6 +77,7 @@ class LVMSetup:
                 sudo=True,
             ).stdout
         )["report"]
+        print(json.dumps(data, indent=2))  # DEBUG
         for entry in data:
             for vg in entry["vg"]:
                 entities.vgs[vg["vg_name"]] = VG(name=vg["vg_name"])
