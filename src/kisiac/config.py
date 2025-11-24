@@ -239,8 +239,8 @@ class Files:
                             content = yte.process_yaml(
                                 fileobj, variables=vars, require_use_yte=True
                             )
-                        # no outfile, hence yte returns string
-                        assert isinstance(content, str)
+                        assert content is not None
+                        content = yaml.dump(content, indent=2)
                     else:
                         with open(base / f, "r") as content:
                             content = content.read()
