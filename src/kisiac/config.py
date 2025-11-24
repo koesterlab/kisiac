@@ -10,6 +10,7 @@ import jinja2
 import yaml
 import git
 from pyfstab.entry import Entry as FstabEntry
+import yte
 
 from kisiac.common import (
     HostAgnosticPath,
@@ -230,6 +231,10 @@ class Files:
                 for f in files:
                     if f.endswith(".j2"):
                         content = templates.get_template(str(base / f)).render(**vars)
+                    elif f.endswith(".yaml"):
+                        content = yte.process_yaml(base / f, variables=vars, require_use_yte=True)
+                        # no outfile, hence yte returns string
+                        assert isinstance(content, str)
                     else:
                         with open(base / f, "r") as content:
                             content = content.read()
