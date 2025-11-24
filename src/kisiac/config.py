@@ -178,6 +178,7 @@ class Files:
 
     def host_stack(self, include_infrastructure_root: bool = False) -> Iterable[Path]:
         hostname = platform.node()
+        print(hostname)
         for infra in self.infrastructure_stack():
             base = infra / "hosts"
             if include_infrastructure_root and infra.exists():
