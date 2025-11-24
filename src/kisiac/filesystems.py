@@ -1,8 +1,9 @@
+from copy import copy
 from dataclasses import dataclass
 import json
 from pathlib import Path
 import re
-from typing import Any
+from typing import Any, Self
 from kisiac.common import HostAgnosticPath, UserError, confirm_action, run_cmd
 from kisiac.config import Config, Filesystem, UserSet
 
@@ -107,6 +108,11 @@ class DeviceInfo:
         else:
             return False
 
+    def with_device(self, device: Path) -> Self:
+        info = copy(self)
+        info.device = device
+        return info
+
 
 class DeviceInfos:
     def __init__(self, host: str) -> None:
@@ -120,14 +126,21 @@ class DeviceInfos:
         self.infos: list[DeviceInfo] = []
 
         def parse_entry(entry: dict[str, Any]) -> None:
-            self.infos.append(
-                DeviceInfo(
-                    device=Path("/dev") / entry["name"],
-                    fstype=entry["fstype"],
-                    label=entry["label"],
-                    uuid=entry["uuid"],
-                )
+            device = Path(entry["name"])
+            device_info = DeviceInfo(
+                device=device,
+                fstype=entry["fstype"],
+                label=entry["label"],
+                uuid=entry["uuid"],
             )
+            self.infos.append(device_info)
+            if device.is_relative_to(Path("/dev/mapper")):
+                # also add /dev/vgname/lvname path for LVM logical volumes
+                device = re.sub(r"[^-]-[^-]", "/", str(device), count=1).replace(
+                    "--", "-"
+                )
+                self.infos.append(device_info.with_device(Path(device)))
+
             for child in entry.get("children", []):
                 parse_entry(child)
 
