@@ -66,6 +66,12 @@ lvm:
           size: 50M
           layout: linear
 
+filesystems:
+  /dev/test-vg/test-lv:
+    fstype: ext4
+    mountpoint: /mnt/test-lv
+    options: defaults
+
 permissions:
   /tmp/test:
     user: jkoester
