@@ -186,6 +186,7 @@ class Files:
             print(base, base.exists())
             if base.exists():
                 for entry in base.iterdir():
+                    print(entry)
                     if not entry.is_dir():
                         raise UserError(f"{base} may only contain directories")
                     # yield if all or entry matches hostname
@@ -222,7 +223,7 @@ class Files:
         else:
             file_type = "system_files"
             vars = self.vars
-        print("dbg!")
+
         for host in self.host_stack():
             collection = host / file_type
             print(collection)
