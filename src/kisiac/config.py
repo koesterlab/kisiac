@@ -182,6 +182,7 @@ class Files:
             base = infra / "hosts"
             if include_infrastructure_root and infra.exists():
                 yield infra
+            print(base, base.exists())
             if base.exists():
                 for entry in base.iterdir():
                     if not entry.is_dir():
@@ -189,7 +190,6 @@ class Files:
                     # yield if all or entry matches hostname
                     regex = str(entry).replace("*", r".+")
                     if entry == "all" or re.match(regex, hostname):
-                        print(base / entry)
                         yield base / entry
 
     def get_config(self) -> dict[str, Any]:
