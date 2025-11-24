@@ -23,9 +23,13 @@ kisiac = { path = ".", editable = true }
 format = "ruff format src"
 check = "ruff check src"
 test = "pytest tests/test_all.py -v"
+build = { cmd = "python -m build", description = "Build the package into the dist/ directory" }
+check-build = { cmd = "python -m twine check dist/*", depends-on = [
+  "build",
+], description = "Check that the package can be uploaded" }
 
 [dependency-groups]
-dev = ["ruff", "pytest"]
+dev = ["ruff", "pytest", "twine", "python-build"]
 
 [tool.pixi.environments]
 dev = ["dev"]
