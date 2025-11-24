@@ -5,6 +5,7 @@ from kisiac.common import (
     UserError,
     cmd_to_str,
     confirm_action,
+    log_action,
     run_cmd,
 )
 from kisiac.filesystems import DeviceInfos, update_filesystems
@@ -46,6 +47,7 @@ def setup_config() -> None:
 def update_host(host: str) -> None:
     config = Config.get_instance()
     for file in config.files.get_files(user=None):
+        log_action(host, "Updating system file", file.target_path)
         file.write(overwrite_existing=True, host=host, sudo=True)
 
     update_system_packages(host)
@@ -57,6 +59,7 @@ def update_host(host: str) -> None:
     users.setup_users(host=host)
     for user in config.users:
         for file in config.files.get_files(user.username):
+            log_action(host, "Updating user file", file.target_path)
             # If the user already has the files, we leave him the new file as a
             # template next to the actual file, with the suffix '.updated'.
             user.fix_permissions(
@@ -156,7 +159,8 @@ def update_lvm(host: str) -> None:
                 )
 
             if not lv_current.is_same_size(lv_desired):
-                print(
+                log_action(
+                    host,
                     f"Resizing LV {lv_desired.name} from {lv_current.size} to "
                     f"{lv_desired.size}"
                 )

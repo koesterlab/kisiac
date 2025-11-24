@@ -1,7 +1,7 @@
 import grp
 import pwd
 
-from kisiac.common import HostAgnosticPath, run_cmd
+from kisiac.common import HostAgnosticPath, log_action, run_cmd
 from kisiac.config import Config
 
 
@@ -15,13 +15,11 @@ def setup_users(host: str) -> None:
     for group in groups:
         # create group if it does not exist
         if run_cmd(["getent", "group", group], check=False, host=host).returncode == 2:
-            print(f"Creating group: {group}")
             run_cmd(["groupadd", group], host=host, sudo=True)
 
     for user in Config.get_instance().users:
         # create user if it does not exist
         if not is_existing_user(user.username):
-            print(f"Creating user: {user.username}")
             group_arg = []
             if user.secondary_groups:
                 group_arg = ["-G", ",".join(user.secondary_groups)]
@@ -41,7 +39,7 @@ def setup_users(host: str) -> None:
                 sudo=True,
             )
         else:
-            print(f"Updating user: {user.username}")
+            log_action("Updating user", user.username)
 
         sshdir = HostAgnosticPath(f"~{user.username}/.ssh", host=host, sudo=True)
         sshdir.mkdir()

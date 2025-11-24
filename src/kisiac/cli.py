@@ -1,6 +1,6 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 
-from kisiac.common import UserError
+from kisiac.common import UserError, log_msg
 from kisiac.runtime_settings import (
     GlobalSettings,
     UpdateHostSettings,
@@ -38,5 +38,5 @@ def main() -> None:
             case _:
                 parser.print_help()
     except UserError as e:
-        print(e)
+        log_msg(e)
         exit(1)

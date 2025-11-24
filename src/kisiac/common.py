@@ -54,6 +54,14 @@ def exists_cmd(cmd: str, host: str, sudo: bool) -> bool:
         return False
 
 
+def log_msg(*msgs: Any) -> None:
+    print(" ".join(map(str, msgs)), file=sys.stderr)
+
+
+def log_action(host: str, *msgs: Any) -> None:
+    log_msg(f"[{host}]", *msgs)
+
+
 def cmd_to_str(*cmds: list[str]) -> str:
     return "\n".join(" ".join(map(str, cmd)) for cmd in cmds)
 
@@ -77,7 +85,7 @@ def run_cmd(
             cmd = ["ssh", host, f"sudo bash -c '{' '.join(cmd)}'"]
         else:
             cmd = ["ssh", host, f"{' '.join(cmd)}"]
-    print(f"Running command: {cmd_to_str(cmd)}", file=sys.stderr)
+    log_action(host, "Running command", cmd_to_str(cmd))
     try:
         return sp.run(
             cmd,
