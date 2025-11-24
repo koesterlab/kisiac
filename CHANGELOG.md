@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/kisiac/kisiac/compare/v1.0.3...v1.0.4) (2025-11-24)
+
+
+### Bug Fixes
+
+* add license ([c4b4798](https://github.com/kisiac/kisiac/commit/c4b4798f7fde5836bff676c1bdc20b5e41a69ce6))
+
 ## [1.0.3](https://github.com/kisiac/kisiac/compare/v1.0.2...v1.0.3) (2025-11-24)
 
 
