@@ -153,11 +153,13 @@ def update_lvm(host: str) -> None:
                     "Perform this action manually and re-run the update."
                 )
             if lv_current.size != lv_desired.size:
+                print(
+                    f"Resizing LV {lv_desired.name} from {lv_current.size} to "
+                    f"{lv_desired.size}"
+                )
                 cmds.append(
                     [
                         "lvresize",
-                        "--fsmode",
-                        "manage",
                         "-L",
                         lv_desired.size,
                         f"{vg_desired.name}/{lv_desired.name}",
