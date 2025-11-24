@@ -7,7 +7,7 @@ users:
       secondary:
         - researchers
     vars:
-      soemthing: foo
+      something: foo
 
 user_software:
   - pkg: snakemake

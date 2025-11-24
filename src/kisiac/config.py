@@ -236,7 +236,6 @@ class Files:
                         content = templates.get_template(str(base / f)).render(**vars)
                     elif f.endswith(".yaml"):
                         with open(base / f, "r") as fileobj:
-                            print(vars)
                             content = yte.process_yaml(
                                 fileobj, variables=vars, require_use_yte=True
                             )
