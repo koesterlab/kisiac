@@ -19,6 +19,13 @@ class LV:
     layout: str
     size: int
 
+    def is_same_size(self, other: Self) -> bool:
+        def simplify(size: int) -> int:
+            # tens of MB should be precise enough
+            return size // 10**7
+
+        return simplify(self.size) == simplify(other.size)
+
 
 @dataclass(frozen=True)
 class VG:

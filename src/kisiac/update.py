@@ -154,7 +154,8 @@ def update_lvm(host: str) -> None:
                     f"from {lv_current.layout} to {lv_desired.layout}. "
                     "Perform this action manually and re-run the update."
                 )
-            if lv_current.size != lv_desired.size:
+
+            if not lv_current.is_same_size(lv_desired):
                 print(
                     f"Resizing LV {lv_desired.name} from {lv_current.size} to "
                     f"{lv_desired.size}"
