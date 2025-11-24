@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/kisiac/kisiac/compare/v1.0.2...v1.0.3) (2025-11-24)
+
+
+### Documentation
+
+* update cli help ([8a436db](https://github.com/kisiac/kisiac/commit/8a436dbf32a9bb15f0c3a0f222d1240e2a7859af))
+
 ## [1.0.2](https://github.com/kisiac/kisiac/compare/v1.0.1...v1.0.2) (2025-11-24)
 
 
