@@ -69,6 +69,7 @@ def run_cmd(
 ) -> sp.CompletedProcess[str]:
     """Run a system command using subprocess.run and check for errors."""
     # TODO check quotation!
+    cmd = list(map(str, cmd))
     if sudo:
         cmd = ["sudo", "bash", "-c", f"{' '.join(cmd)}"]
     if host != "localhost":
@@ -76,7 +77,7 @@ def run_cmd(
             cmd = ["ssh", host, f"sudo bash -c '{' '.join(cmd)}'"]
         else:
             cmd = ["ssh", host, f"{' '.join(cmd)}"]
-    print(f"Running command: {' '.join(cmd)}", file=sys.stderr)
+    print(f"Running command: {cmd_to_str(cmd)}", file=sys.stderr)
     try:
         return sp.run(
             cmd,
