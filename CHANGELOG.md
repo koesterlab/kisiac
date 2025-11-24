@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/kisiac/kisiac/compare/v1.0.1...v1.0.2) (2025-11-24)
+
+
+### Bug Fixes
+
+* use correct package for building ([f91bd42](https://github.com/kisiac/kisiac/commit/f91bd42750005194913938017fc2e10759ef9df9))
+
 ## [1.0.1](https://github.com/kisiac/kisiac/compare/v1.0.0...v1.0.1) (2025-11-24)
 
 
