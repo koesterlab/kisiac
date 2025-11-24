@@ -178,21 +178,18 @@ class Files:
 
     def host_stack(self, include_infrastructure_root: bool = False) -> Iterable[Path]:
         hostname = platform.node()
-        print(hostname)
         for infra in self.infrastructure_stack():
             base = infra / "hosts"
             if include_infrastructure_root and infra.exists():
                 yield infra
-            print(base, base.exists())
             if base.exists():
                 for entry in base.iterdir():
-                    print(entry)
                     if not entry.is_dir():
                         raise UserError(f"{base} may only contain directories")
                     # yield if all or entry matches hostname
                     regex = str(entry).replace("*", r".+")
                     if entry == "all" or re.match(regex, hostname):
-                        yield base / entry
+                        yield entry
 
     def get_config(self) -> dict[str, Any]:
         config = {}
