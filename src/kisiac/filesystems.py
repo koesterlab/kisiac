@@ -149,7 +149,6 @@ class DeviceInfos:
 
         for entry in lsblk_output["blockdevices"]:
             parse_entry(entry)
-        print(self.infos)
 
     def get_info(self, filesystem: Filesystem) -> DeviceInfo:
         for info in self.infos:
