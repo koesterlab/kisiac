@@ -15,10 +15,15 @@ def get_argument_parser() -> ArgumentParser:
     update_hosts = subparsers.add_parser(
         "update-hosts",
         help="Update given hosts",
+        description="Update given hosts",
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     UpdateHostSettings.register_cli_args(update_hosts)
-    subparsers.add_parser("setup-config", help="Setup the kisiac configuration")
+    subparsers.add_parser(
+        "setup-config",
+        help="Setup the kisiac configuration",
+        description="Setup the kisiac configuration",
+    )
 
     return parser
 
