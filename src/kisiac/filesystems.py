@@ -99,6 +99,7 @@ class DeviceInfo:
     uuid: str | None
 
     def is_targeted_by_filesystem(self, filesystem: Filesystem) -> bool:
+        print(self.device, filesystem.device)
         if filesystem.device is not None:
             return self.device == filesystem.device
         elif filesystem.label is not None:
