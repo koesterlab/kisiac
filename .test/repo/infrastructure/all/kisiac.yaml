@@ -68,7 +68,7 @@ lvm:
 
 filesystems:
   - device: /dev/test-vg/test-lv
-    fstype: ext4
+    type: ext4
     mountpoint: /mnt/test-lv
     options: defaults
 
