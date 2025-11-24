@@ -52,6 +52,8 @@ def update_host(host: str) -> None:
 
     update_lvm(host)
 
+    update_filesystems(host)
+
     users.setup_users(host=host)
     for user in config.users:
         for file in config.files.get_files(user.username):
@@ -60,8 +62,6 @@ def update_host(host: str) -> None:
             user.fix_permissions(
                 file.write(overwrite_existing=False, host=host, sudo=True), host=host
             )
-
-    update_filesystems(host)
 
 
 def update_system_packages(host: str) -> None:
@@ -164,11 +164,7 @@ def update_lvm(host: str) -> None:
                 device_info = device_infos.get_info_for_device(
                     vg_desired.get_lv_device(lv_desired.name)
                 )
-                resize_fs = (
-                    ["--resizefs"]
-                    if device_info is not None and device_info.fstype is not None
-                    else []
-                )
+                resize_fs = ["--resizefs"] if device_info.fstype is not None else []
 
                 cmds.append(
                     [

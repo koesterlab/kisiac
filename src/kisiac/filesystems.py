@@ -1,7 +1,9 @@
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
-from kisiac.common import HostAgnosticPath, confirm_action, run_cmd
+from typing import Any
+from kisiac.common import HostAgnosticPath, UserError, confirm_action, run_cmd
 from kisiac.config import Config, Filesystem, UserSet
 
 from pyfstab import Fstab
@@ -17,7 +19,7 @@ def update_filesystems(host: str) -> None:
     mkfs_cmds = []
     for filesystem in filesystems:
         device_info = device_infos.get_info(filesystem)
-        if device_info is not None and device_info.fstype != filesystem.fstype:
+        if device_info.fstype != filesystem.fstype:
             mkfs_cmds.append(["mkfs", "-t", filesystem.fstype, str(device_info.device)])
 
     # Second, update /etc/fstab.
@@ -108,30 +110,43 @@ class DeviceInfo:
 
 class DeviceInfos:
     def __init__(self, host: str) -> None:
-        blkid_output = run_cmd(["blkid"], sudo=True, host=host).stdout.splitlines()
-        self.infos = []
-        for entry in blkid_output:
-            device, attrs = entry.split(":", maxsplit=1)
-            attrs = {
-                match.group("attr"): match.group("value")
-                for match in blkid_attrs_re.finditer(attrs)
-            }
-            self.infos.append(
-                DeviceInfo(
-                    device=Path(device),
-                    fstype=attrs.get("TYPE"),
-                    label=attrs.get("LABEL"),
-                    uuid=attrs.get("UUID"),
-                )
-            )
+        lsblk_output = json.loads(
+            run_cmd(
+                ["lsblk", "--json", "--fs"],
+                sudo=True,
+                host=host,
+            ).stdout
+        )
+        self.infos: list[DeviceInfo] = []
 
-    def get_info(self, filesystem: Filesystem) -> DeviceInfo | None:
+        def parse_entry(entry: dict[str, Any]) -> None:
+            uuid = entry["uuid"]
+            if uuid:
+                self.infos.append(
+                    DeviceInfo(
+                        device=Path("/dev") / entry["name"],
+                        fstype=entry["fstype"],
+                        label=entry["label"],
+                        uuid=entry["uuid"],
+                    )
+                )
+            for child in entry.get("children", []):
+                parse_entry(child)
+
+        for entry in lsblk_output["blockdevices"]:
+            parse_entry(entry)
+
+    def get_info(self, filesystem: Filesystem) -> DeviceInfo:
         for info in self.infos:
             if info.is_targeted_by_filesystem(filesystem):
                 return info
+        raise UserError(
+            f"No device found for filesystem with device={filesystem.device}, "
+            f"label={filesystem.label}, uuid={filesystem.uuid}"
+        )
 
-    def get_info_for_device(self, device: Path) -> DeviceInfo | None:
+    def get_info_for_device(self, device: Path) -> DeviceInfo:
         for info in self.infos:
             if info.device == device:
                 return info
-        return None
+        raise UserError(f"No device info found for device {device}")
