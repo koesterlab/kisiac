@@ -160,7 +160,9 @@ def update_lvm(host: str) -> None:
                     f"{lv_desired.size}"
                 )
 
-                device_info = device_infos.get_info_for_device(vg_desired.get_lv_device(lv_desired.name))
+                device_info = device_infos.get_info_for_device(
+                    vg_desired.get_lv_device(lv_desired.name)
+                )
                 assert device_info is not None
 
                 cmds.append(

@@ -19,6 +19,7 @@ class LV:
     layout: str
     size: int
 
+
 @dataclass(frozen=True)
 class VG:
     name: str
